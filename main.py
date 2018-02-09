@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # _*_ coding: utf-8 _*_
+import json
 import os
 import re
 import time
 
-from requests.exceptions import ConnectionError
-from requests.exceptions import ReadTimeout
+import requests
 
 import config
 from commands import admin_tools
@@ -13,18 +13,103 @@ from utils import my_bot, my_bot_name, commands_handler, is_command, bot_admin_c
     action_log, user_action_log, dump_messages, global_lock, message_dump_lock
 
 
+def is_non_zero_file(file_path):
+    return os.path.isfile(file_path) and os.path.getsize(file_path) > 0
+
+
+class DataManager:
+    def __init__(self, file_name=config.file_location['user_data']):
+        self.file_name = file_name
+        self.data = dict()
+        self.load()
+
+    def load(self):
+        if is_non_zero_file(self.file_name):
+            global_lock.acquire()
+            with open(self.file_name, 'r', encoding='utf-8') as file:
+                self.data = json.load(file)
+            global_lock.release()
+
+    def save(self):
+        global_lock.acquire()
+        with open(self.file_name, 'w', encoding='utf-8') as file:
+            json.dump(self.data, file)
+        global_lock.release()
+
+    def dump_file_to_admin(self):
+        if is_non_zero_file(self.file_name):
+            global_lock.acquire()
+            with open(self.file_name, 'r', encoding='utf-8') as file:
+                my_bot.send_message(config.admin_id, file.read())
+            global_lock.release()
+
+    def register_user(self, message):
+        self.data[str(message.from_user.id)] = dict()
+        sent = my_bot.send_message(message.from_user.id, 'Name?')
+        my_bot.register_next_step_handler(sent, self.set_user_name)
+
+    def set_user_name(self, message):
+        # Todo: check existing
+        self.data[str(message.from_user.id)]['name'] = str(message.text)
+
+        sent = my_bot.send_message(message.from_user.id, 'Work time?')
+        my_bot.register_next_step_handler(sent, self.set_user_week_work_time)
+
+    def set_user_week_work_time(self, message):
+        self.data[str(message.from_user.id)]['week_work_time'] = str(message.text)
+
+        self.register_user_finish(message)
+
+    def register_user_finish(self, message):
+        self.save()
+        my_bot.send_message(message.from_user.id, 'Success! Now use /week')
+        # self.dump_file_to_admin()
+
+
+class AcsManager:
+    def __init__(self):
+        self.url = 'https://corp.rfdyn.ru/index.php/acs-tabel-intermediadate/index-text?' \
+                   'AcsTabelIntermediadateSearch%5Bstaff_id%5D=5061&' \
+                   'AcsTabelIntermediadateSearch%5Bdate_pass_first%5D=2018-02-05&' \
+                   'AcsTabelIntermediadateSearch%5Bdate_pass_last%5D=2018-02-09&' \
+                   'AcsTabelIntermediadateSearch%5Bsummary%5D=0&' \
+                   'AcsTabelIntermediadateSearch%5Bsummary_table%5D=0&' \
+                   'AcsTabelIntermediadateSearch%5Bsummary_table%5D=1&' \
+                   'AcsTabelIntermediadateSearch%5Bsummary_table_by_day%5D=0'
+
+    def res(self):
+        response = requests.get(self.url)
+        print(response)
+        my_bot.send_message(config.admin_id, response.text)
+
+
+my_data = DataManager()
+my_acs = AcsManager()
+
+
 @my_bot.message_handler(func=commands_handler(['/start']))
-def my_new_data(message):
+def default_messages(message):
     command = message.text.lower().split()[0]
     command_raw = re.split("@+", command)[0]
     with open(config.file_location[command_raw], 'r', encoding='utf-8') as file:
         my_bot.reply_to(message, file.read(), parse_mode="HTML", disable_web_page_preview=True)
+    my_data.register_user(message)
     user_action_log(message, "called that command: {}".format(command))
+
+
+@my_bot.message_handler(func=commands_handler(['/week']))
+def default_messages(message):
+    my_acs.res()
+
+
+@my_bot.message_handler(func=commands_handler(['/dump']))
+def default_messages(message):
+    my_data.dump_file_to_admin()
 
 
 @my_bot.message_handler(func=is_command())
 @bot_admin_command
-def admin_toys(message):
+def admin_tools(message):
     parts = message.text.split()
     if len(parts) < 2 or parts[1] != my_bot_name:
         return
@@ -53,12 +138,12 @@ while __name__ == '__main__':
         time.sleep(1)
 
     # из-за Telegram API иногда какой-нибудь пакет не доходит
-    except ReadTimeout as e:
+    except requests.exceptions.ReadTimeout as e:
         action_log("Read Timeout. Because of Telegram API. We are offline. Reconnecting in 5 seconds.")
         time.sleep(5)
 
     # если пропало соединение, то пытаемся снова
-    except ConnectionError as e:
+    except requests.exceptions.ConnectionError as e:
         action_log("Connection Error. We are offline. Reconnecting...")
         time.sleep(5)
 

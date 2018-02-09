@@ -12,7 +12,7 @@ file_location = {
     '/start': text_dir + 'DataStart.txt',
     'bot_logs': gen_dir + 'bot_logs.txt',
     'bot_killed': gen_dir + 'they_killed_me.txt',
+    'user_data': gen_dir + 'user_data.json',
 }
 
-# ID администраторов бота
-admin_ids = [28006241]
+admin_id = 28006241
