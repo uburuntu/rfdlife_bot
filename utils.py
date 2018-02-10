@@ -79,7 +79,7 @@ def is_command():
 
 def bot_admin_command(func):
     def wrapped(message):
-        if message.from_user.id in config.admin_ids:
+        if message.from_user.id == config.admin_id:
             return func(message)
         return
 

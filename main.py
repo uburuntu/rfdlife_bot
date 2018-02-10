@@ -8,6 +8,7 @@ import time
 import requests
 
 import config
+import tokens
 from commands import admin_tools
 from utils import my_bot, my_bot_name, commands_handler, is_command, bot_admin_command, \
     action_log, user_action_log, dump_messages, global_lock, message_dump_lock
@@ -45,15 +46,19 @@ class DataManager:
 
     def register_user(self, message):
         self.data[str(message.from_user.id)] = dict()
-        sent = my_bot.send_message(message.from_user.id, 'Name?')
+        sent = my_bot.send_message(message.from_user.id, 'Your number in Acs? Starting from 5059')
         my_bot.register_next_step_handler(sent, self.set_user_name)
 
     def set_user_name(self, message):
         # Todo: check existing
-        self.data[str(message.from_user.id)]['name'] = str(message.text)
+        if message.text.isdigit ():
+            self.data[str(message.from_user.id)]['name'] = str(message.text)
+            self.register_user_finish(message)
+        else:
+            my_bot.send_message(message.from_user.id, 'Failure! Need number')
 
-        sent = my_bot.send_message(message.from_user.id, 'Work time?')
-        my_bot.register_next_step_handler(sent, self.set_user_week_work_time)
+        # sent = my_bot.send_message(message.from_user.id, 'Work time?')
+        # my_bot.register_next_step_handler(sent, self.set_user_week_work_time)
 
     def set_user_week_work_time(self, message):
         self.data[str(message.from_user.id)]['week_work_time'] = str(message.text)
@@ -65,11 +70,15 @@ class DataManager:
         my_bot.send_message(message.from_user.id, 'Success! Now use /week')
         # self.dump_file_to_admin()
 
+    def get_user_name(self, message):
+        # Todo: check existing
+        return self.data.get(str(message.from_user.id), {}).get('name', '')
+
 
 class AcsManager:
     def __init__(self):
         self.url = 'https://corp.rfdyn.ru/index.php/acs-tabel-intermediadate/index-text?' \
-                   'AcsTabelIntermediadateSearch%5Bstaff_id%5D=5061&' \
+                   'AcsTabelIntermediadateSearch%5Bstaff_id%5D={}&' \
                    'AcsTabelIntermediadateSearch%5Bdate_pass_first%5D=2018-02-05&' \
                    'AcsTabelIntermediadateSearch%5Bdate_pass_last%5D=2018-02-09&' \
                    'AcsTabelIntermediadateSearch%5Bsummary%5D=0&' \
@@ -77,10 +86,10 @@ class AcsManager:
                    'AcsTabelIntermediadateSearch%5Bsummary_table%5D=1&' \
                    'AcsTabelIntermediadateSearch%5Bsummary_table_by_day%5D=0'
 
-    def res(self):
-        response = requests.get(self.url)
-        print(response)
-        my_bot.send_message(config.admin_id, response.text)
+    def res(self, message):
+        response = requests.get(self.url.format(my_data.get_user_name(message)), auth=(tokens.auth_login, tokens.auth_pswd))
+        # print(response)
+        my_bot.reply_to(message, response.text)
 
 
 my_data = DataManager()
@@ -99,7 +108,7 @@ def default_messages(message):
 
 @my_bot.message_handler(func=commands_handler(['/week']))
 def default_messages(message):
-    my_acs.res()
+    my_acs.res(message)
 
 
 @my_bot.message_handler(func=commands_handler(['/dump']))
