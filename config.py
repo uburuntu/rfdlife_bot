@@ -15,4 +15,4 @@ file_location = {
     'user_data': gen_dir + 'user_data.json',
 }
 
-admin_id = 28006241
+admin_ids = [28006241, 173546332, 100610568]

@@ -77,9 +77,26 @@ def is_command():
     return wrapped
 
 
+def command_with_delay(delay=10):
+    def my_decorator(func):
+        def wrapped(message):
+            now = datetime.now().timestamp()
+            diff = now - func.last_call if hasattr(func, 'last_call') else now
+            if diff < delay:
+                user_action_log(message, "called {} after {} sec, delay is {}".format(func, round(diff), delay))
+                return
+            func.last_call = now
+
+            return func(message)
+
+        return wrapped
+
+    return my_decorator
+
+
 def bot_admin_command(func):
     def wrapped(message):
-        if message.from_user.id == config.admin_id:
+        if message.from_user.id in config.admin_ids:
             return func(message)
         return
 
