@@ -76,6 +76,15 @@ class AcsManager:
     def time_format(time):
         return time.strftime('%Y-%m-%d')
 
+    @staticmethod
+    def reply_format(text, start_date, end_date):
+        if is_non_zero_file(config.file_location['acs_answer']):
+            with open(config.file_location['acs_answer'], 'r', encoding='utf-8') as file:
+                split = text.split()
+                nice = file.read()
+                return nice.format(split[-5], split[-4], start_date, end_date, split[-2], split[-1])
+        return text
+
     def year_time(self, message):
         today = datetime.today()
         year_start = today.replace(day=1, month=1)
@@ -98,14 +107,16 @@ class AcsManager:
         today = datetime.today()
         self._make_request(message, today, today)
 
-    def _make_request(self, message, start_date=None, end_date=None):
+    def _make_request(self, message, start_date, end_date):
         payload = (('AcsTabelIntermediadateSearch[staff_id]', my_data.get_user_name(message)),
                    ('AcsTabelIntermediadateSearch[date_pass_first]', self.time_format(start_date)),
                    ('AcsTabelIntermediadateSearch[date_pass_last]', self.time_format(end_date)),
                    ('AcsTabelIntermediadateSearch[summary_table]', '1'))
 
         response = requests.get(self.api_url, auth=(tokens.auth_login, tokens.auth_pswd), params=payload)
-        my_bot.reply_to(message, response.text)
+        my_bot.reply_to(message, self.reply_format(response.text,
+                                                   self.time_format(start_date), self.time_format(end_date)),
+                        parse_mode="HTML")
 
 
 my_data = DataManager()
