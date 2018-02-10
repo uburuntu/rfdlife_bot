@@ -25,7 +25,7 @@ class DataManager:
     def save(self):
         global_lock.acquire()
         with open(self.file_name, 'w', encoding='utf-8') as file:
-            json.dump(self.data, file)
+            json.dump(self.data, file, indent=True)
         global_lock.release()
 
     def dump_file(self, message):
@@ -63,7 +63,7 @@ class DataManager:
 
     def get_user_name(self, message):
         # Todo: check existing
-        return self.data.get(str(message.from_user.id), {}).get('name', '')
+        return self.data.get(str(message.from_user.id), {}).get('name', '5059')
 
 
 class AcsManager:

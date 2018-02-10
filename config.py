@@ -15,4 +15,5 @@ file_location = {
     'user_data': gen_dir + 'user_data.json',
 }
 
+chai_subscribers = [28006241, 155094831, 78179118, 173546332, 122090167, 100610568]
 admin_ids = [28006241, 173546332, 100610568]

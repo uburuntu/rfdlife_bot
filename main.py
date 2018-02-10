@@ -11,7 +11,7 @@ from commands import admin_tools
 from commands import chai
 from managers import my_data, my_acs
 from utils import my_bot, my_bot_name, commands_handler, is_command, bot_admin_command, \
-    action_log, user_action_log, dump_messages, global_lock, message_dump_lock
+    action_log, user_action_log, dump_messages, global_lock, message_dump_lock, command_with_delay
 
 
 @my_bot.message_handler(func=commands_handler(['/start']))
@@ -26,15 +26,18 @@ def default_messages(message):
 
 @my_bot.message_handler(func=commands_handler(['/week']))
 def command_week(message):
+    user_action_log(message, "requested week info")
     my_acs.res(message)
 
 
 @my_bot.message_handler(func=commands_handler(['/chai']))
+@command_with_delay(delay=15 * 60)
 def command_chai(message):
+    user_action_log(message, "called chai")
     chai.chai(message)
 
 
-@my_bot.callback_query_handler(func=lambda call: call.message and call.data.startswith('chai'))
+@my_bot.callback_query_handler(func=lambda call: call.data.startswith('chai'))
 def callback_chai(call):
     chai.chai_callback(call)
 
@@ -42,6 +45,7 @@ def callback_chai(call):
 @my_bot.message_handler(func=commands_handler(['/dump']))
 @bot_admin_command
 def command_dump(message):
+    user_action_log(message, "requested dump")
     my_data.dump_file(message)
 
 

@@ -41,6 +41,12 @@ def curr_time():
     return datetime.now().strftime('%d/%m/%Y %H:%M:%S')
 
 
+def user_name(user):
+    first_name = user.first_name
+    last_name = ' ' + user.last_name if isinstance(user.last_name, str) else ''
+    return first_name + last_name
+
+
 def user_info(user):
     # Required fields
     user_id = str(user.id)
@@ -154,3 +160,17 @@ def dump_messages(all_messages):
         pickle.dump(file_messages, f, pickle.HIGHEST_PROTOCOL)
         f.close()
     message_dump_lock.release()
+
+
+def bold(text, mode="html"):
+    if mode.lower() == "html":
+        return "<b>{}</b>".format(text)
+    if mode.lower() == "markdown":
+        return "*{}*".format(text)
+
+
+def link(text, user_id, mode="html"):
+    if mode.lower() == "html":
+        return "<a href=\"tg://user?id={0}\">{1}</a>".format(user_id, text)
+    if mode.lower() == "markdown":
+        return "[{1}](tg://user?id={0})".format(user_id, text)

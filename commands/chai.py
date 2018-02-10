@@ -1,18 +1,48 @@
 # !/usr/bin/env python
 # _*_ coding: utf-8 _*_
+from datetime import datetime
 
 from telebot import types
 
-from utils import my_bot
+import config
+from utils import my_bot, user_name, link, user_action_log
+
+
+def chai_subs_notify(text, keyboard=None):
+    for chat_id in config.chai_subscribers:
+        try:
+            my_bot.send_message(chat_id, text, parse_mode="HTML", reply_markup=keyboard)
+        except:
+            pass
 
 
 def chai(message):
     keyboard = types.InlineKeyboardMarkup()
-    url_button = types.InlineKeyboardButton(text="Перейти на Яндекс", url="https://ya.ru")
-    keyboard.add(url_button)
-    my_bot.send_message(message.chat.id, "Привет! Нажми на кнопку и перейди в поисковик.", reply_markup=keyboard)
+    keyboard.row(types.InlineKeyboardButton(text="Го!", callback_data="chai_go"),
+                 types.InlineKeyboardButton(text="Через 5 мин", callback_data="chai_5min"))
+    keyboard.add(types.InlineKeyboardButton(text="Нет, позже", callback_data="chai_no"))
+    chai_subs_notify(user_name(message.from_user) + " зовет чай! ☕️", keyboard)
 
 
 def chai_callback(call):
-    if call.data == "chai_add":
-        my_bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="Пыщь")
+    msg = call.message
+
+    if datetime.now().timestamp() - msg.date > 15 * 60:
+        my_bot.edit_message_text(chat_id=msg.chat.id, message_id=msg.message_id,
+                                 text=msg.text + "\n\n" + "Это сообщение устарело! Используй /chai.")
+        my_bot.answer_callback_query(callback_query_id=call.id, show_alert=True, text="Это сообщение устарело!")
+        return
+
+    text = "heh"
+    if call.data == "chai_go":
+        text = "✅ Ты сообщил, что сейчас придешь на кухню"
+        chai_subs_notify("✅ " + link(user_name(msg.chat), msg.chat.id) + " сейчас придет на кухню!")
+    elif call.data == "chai_5min":
+        text = "🚗 Ты сообщил, что придешь через 5 минут"
+        chai_subs_notify("5️⃣ " + link(user_name(msg.chat), msg.chat.id) + " придет через 5 минут.")
+    elif call.data == "chai_no":
+        text = "💔 Ты сообщил, что не придешь"
+        chai_subs_notify("⛔ " + link(user_name(msg.chat), msg.chat.id) + " сейчас не хочет или не может.")
+
+    my_bot.edit_message_text(chat_id=msg.chat.id, message_id=msg.message_id, text=msg.text, parse_mode="HTML")
+    my_bot.answer_callback_query(callback_query_id=call.id, show_alert=False, text=text)
