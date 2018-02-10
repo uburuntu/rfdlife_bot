@@ -11,7 +11,7 @@ from commands import admin_tools
 from commands import chai
 from managers import my_data, my_acs
 from utils import my_bot, my_bot_name, commands_handler, is_command, bot_admin_command, \
-    action_log, user_action_log, dump_messages, global_lock, message_dump_lock, command_with_delay
+    action_log, user_action_log, dump_messages, global_lock, message_dump_lock, command_with_delay, user_name
 
 
 @my_bot.message_handler(func=commands_handler(['/start']))
@@ -74,7 +74,7 @@ def command_chai(message):
 
 @my_bot.callback_query_handler(func=lambda call: call.data.startswith('chai'))
 def callback_chai(call):
-    user_action_log(call.message, "answered to chai")
+    action_log(user_name(call.message.chat) + " answered to chai")
     chai.chai_callback(call)
 
 

@@ -68,7 +68,6 @@ class DataManager:
         my_bot.send_message(message.from_user.id, 'Вы авторизованы! Теперь можете использовать /week и т.п.')
 
     def get_user_name(self, message):
-        # Todo: check existing
         if self.is_registered(message):
             return self.data.get(str(message.from_user.id), {}).get('name', '5059')
         else:

@@ -16,5 +16,12 @@ file_location = {
     'user_data': gen_dir + 'user_data.json',
 }
 
-chai_subscribers = [28006241, 155094831, 78179118, 173546332, 122090167, 100610568]
+chai_subscribers = [28006241,  # rmbk
+                    155094831,  # mix
+                    78179118,  # tester
+                    173546332,  # riba
+                    122090167,  # isk
+                    100610568,  # nazar
+                    211145131]  # kobz
+
 admin_ids = [28006241, 173546332, 100610568]
