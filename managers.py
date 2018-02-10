@@ -1,6 +1,8 @@
 # !/usr/bin/env python
 # _*_ coding: utf-8 _*_
 import json
+from calendar import monthrange
+from datetime import datetime, timedelta
 
 import requests
 
@@ -68,19 +70,41 @@ class DataManager:
 
 class AcsManager:
     def __init__(self):
-        self.url = 'https://corp.rfdyn.ru/index.php/acs-tabel-intermediadate/index-text?' \
-                   'AcsTabelIntermediadateSearch%5Bstaff_id%5D={}&' \
-                   'AcsTabelIntermediadateSearch%5Bdate_pass_first%5D=2018-02-05&' \
-                   'AcsTabelIntermediadateSearch%5Bdate_pass_last%5D=2018-02-09&' \
-                   'AcsTabelIntermediadateSearch%5Bsummary%5D=0&' \
-                   'AcsTabelIntermediadateSearch%5Bsummary_table%5D=0&' \
-                   'AcsTabelIntermediadateSearch%5Bsummary_table%5D=1&' \
-                   'AcsTabelIntermediadateSearch%5Bsummary_table_by_day%5D=0'
+        self.api_url = 'https://corp.rfdyn.ru/index.php/acs-tabel-intermediadate/index-text'
 
-    def res(self, message):
-        response = requests.get(self.url.format(my_data.get_user_name(message)),
-                                auth=(tokens.auth_login, tokens.auth_pswd))
-        # print(response)
+    @staticmethod
+    def time_format(time):
+        return time.strftime('%Y-%m-%d')
+
+    def year_time(self, message):
+        today = datetime.today()
+        year_start = today.replace(day=1, month=1)
+        year_end = today.replace(day=31, month=12)
+        self._make_request(message, year_start, year_end)
+
+    def month_time(self, message):
+        today = datetime.today()
+        month_start = today.replace(day=1)
+        month_end = today.replace(day=monthrange(today.year, today.month)[1])
+        self._make_request(message, month_start, month_end)
+
+    def week_time(self, message):
+        today = datetime.today()
+        week_start = today - timedelta(days=today.weekday())
+        week_end = week_start + timedelta(days=6)
+        self._make_request(message, week_start, week_end)
+
+    def day_time(self, message):
+        today = datetime.today()
+        self._make_request(message, today, today)
+
+    def _make_request(self, message, start_date=None, end_date=None):
+        payload = (('AcsTabelIntermediadateSearch[staff_id]', my_data.get_user_name(message)),
+                   ('AcsTabelIntermediadateSearch[date_pass_first]', self.time_format(start_date)),
+                   ('AcsTabelIntermediadateSearch[date_pass_last]', self.time_format(end_date)),
+                   ('AcsTabelIntermediadateSearch[summary_table]', '1'))
+
+        response = requests.get(self.api_url, auth=(tokens.auth_login, tokens.auth_pswd), params=payload)
         my_bot.reply_to(message, response.text)
 
 

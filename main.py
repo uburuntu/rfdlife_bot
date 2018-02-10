@@ -16,36 +16,59 @@ from utils import my_bot, my_bot_name, commands_handler, is_command, bot_admin_c
 
 @my_bot.message_handler(func=commands_handler(['/start']))
 def default_messages(message):
+    user_action_log(message, "called " + message.text)
     command = message.text.lower().split()[0]
     command_raw = re.split("@+", command)[0]
     with open(config.file_location[command_raw], 'r', encoding='utf-8') as file:
         my_bot.reply_to(message, file.read(), parse_mode="HTML", disable_web_page_preview=True)
     my_data.register_user(message)
-    user_action_log(message, "called that command: {}".format(command))
+
+
+@my_bot.message_handler(func=commands_handler(['/year']))
+@command_with_delay(delay=1)
+def command_year(message):
+    user_action_log(message, "called " + message.text)
+    my_acs.year_time(message)
+
+
+@my_bot.message_handler(func=commands_handler(['/month']))
+@command_with_delay(delay=1)
+def command_month(message):
+    user_action_log(message, "called " + message.text)
+    my_acs.month_time(message)
 
 
 @my_bot.message_handler(func=commands_handler(['/week']))
+@command_with_delay(delay=1)
 def command_week(message):
-    user_action_log(message, "requested week info")
-    my_acs.res(message)
+    user_action_log(message, "called " + message.text)
+    my_acs.week_time(message)
+
+
+@my_bot.message_handler(func=commands_handler(['/day']))
+@command_with_delay(delay=1)
+def command_day(message):
+    user_action_log(message, "called " + message.text)
+    my_acs.day_time(message)
 
 
 @my_bot.message_handler(func=commands_handler(['/chai']))
 @command_with_delay(delay=15 * 60)
 def command_chai(message):
-    user_action_log(message, "called chai")
+    user_action_log(message, "called " + message.text)
     chai.chai(message)
 
 
 @my_bot.callback_query_handler(func=lambda call: call.data.startswith('chai'))
 def callback_chai(call):
+    user_action_log(call.message, "answered to chai")
     chai.chai_callback(call)
 
 
 @my_bot.message_handler(func=commands_handler(['/dump']))
 @bot_admin_command
 def command_dump(message):
-    user_action_log(message, "requested dump")
+    user_action_log(message, "called " + message.text)
     my_data.dump_file(message)
 
 
