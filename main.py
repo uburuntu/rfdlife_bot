@@ -21,6 +21,12 @@ def default_messages(message):
     command_raw = re.split("@+", command)[0]
     with open(config.file_location[command_raw], 'r', encoding='utf-8') as file:
         my_bot.reply_to(message, file.read(), parse_mode="HTML", disable_web_page_preview=True)
+    if not my_data.is_registered(message):
+        my_data.register_user(message)
+
+
+@my_bot.message_handler(func=commands_handler(['/restart']))
+def command_restart(message):
     my_data.register_user(message)
 
 
@@ -50,6 +56,13 @@ def command_week(message):
 def command_day(message):
     user_action_log(message, "called " + message.text)
     my_acs.day_time(message)
+
+
+@my_bot.message_handler(func=commands_handler(['/in_office']))
+@command_with_delay(delay=1)
+def command_in_office(message):
+    user_action_log(message, "called " + message.text)
+    my_acs.in_office(message)
 
 
 @my_bot.message_handler(func=commands_handler(['/chai']))

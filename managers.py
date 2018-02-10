@@ -8,7 +8,7 @@ import requests
 
 import config
 import tokens
-from utils import global_lock, my_bot, is_non_zero_file
+from utils import global_lock, my_bot, is_non_zero_file, bold
 
 
 class DataManager:
@@ -37,9 +37,14 @@ class DataManager:
                 my_bot.reply_to(message, file.read())
             global_lock.release()
 
+    def is_registered(self, message):
+        return self.data[str(message.from_user.id)] is not None
+
     def register_user(self, message):
         self.data[str(message.from_user.id)] = dict()
-        sent = my_bot.send_message(message.from_user.id, 'Your number in Acs? Starting from 5059')
+        sent = my_bot.send_message(message.from_user.id,
+                                   bold('Авторизация') + '\n\nТвой номер в СКД? Например: 5059, 5060 и т.д.',
+                                   parse_mode="HTML")
         my_bot.register_next_step_handler(sent, self.set_user_name)
 
     def set_user_name(self, message):
@@ -48,7 +53,7 @@ class DataManager:
             self.data[str(message.from_user.id)]['name'] = str(message.text)
             self.register_user_finish(message)
         else:
-            my_bot.send_message(message.from_user.id, 'Failure! Need number')
+            my_bot.send_message(message.from_user.id, 'Ошибка, нужно указать номер')
 
             # sent = my_bot.send_message(message.from_user.id, 'Work time?')
             # my_bot.register_next_step_handler(sent, self.set_user_week_work_time)
@@ -60,17 +65,20 @@ class DataManager:
 
     def register_user_finish(self, message):
         self.save()
-        my_bot.send_message(message.from_user.id, 'Success! Now use /week')
-        # self.dump_file_to_admin()
+        my_bot.send_message(message.from_user.id, 'Вы авторизованы! Теперь можете использовать /week и т.п.')
 
     def get_user_name(self, message):
         # Todo: check existing
-        return self.data.get(str(message.from_user.id), {}).get('name', '5059')
+        if self.is_registered(message):
+            return self.data.get(str(message.from_user.id), {}).get('name', '5059')
+        else:
+            my_bot.reply_to(message, 'Вы не авторизованы! Используйте /restart')
 
 
 class AcsManager:
     def __init__(self):
-        self.api_url = 'https://corp.rfdyn.ru/index.php/acs-tabel-intermediadate/index-text'
+        self.acs_url = 'https://corp.rfdyn.ru/index.php/acs-tabel-intermediadate/index-text'
+        self.in_url = 'https://corp.rfdyn.ru/index.php/site/now-in-office-text'
 
     @staticmethod
     def time_format(time):
@@ -89,34 +97,38 @@ class AcsManager:
         today = datetime.today()
         year_start = today.replace(day=1, month=1)
         year_end = today.replace(day=31, month=12)
-        self._make_request(message, year_start, year_end)
+        self._make_time_request(message, year_start, year_end)
 
     def month_time(self, message):
         today = datetime.today()
         month_start = today.replace(day=1)
         month_end = today.replace(day=monthrange(today.year, today.month)[1])
-        self._make_request(message, month_start, month_end)
+        self._make_time_request(message, month_start, month_end)
 
     def week_time(self, message):
         today = datetime.today()
         week_start = today - timedelta(days=today.weekday())
         week_end = week_start + timedelta(days=6)
-        self._make_request(message, week_start, week_end)
+        self._make_time_request(message, week_start, week_end)
 
     def day_time(self, message):
         today = datetime.today()
-        self._make_request(message, today, today)
+        self._make_time_request(message, today, today)
 
-    def _make_request(self, message, start_date, end_date):
+    def _make_time_request(self, message, start_date, end_date):
         payload = (('AcsTabelIntermediadateSearch[staff_id]', my_data.get_user_name(message)),
                    ('AcsTabelIntermediadateSearch[date_pass_first]', self.time_format(start_date)),
                    ('AcsTabelIntermediadateSearch[date_pass_last]', self.time_format(end_date)),
                    ('AcsTabelIntermediadateSearch[summary_table]', '1'))
 
-        response = requests.get(self.api_url, auth=(tokens.auth_login, tokens.auth_pswd), params=payload)
+        response = requests.get(self.acs_url, auth=(tokens.auth_login, tokens.auth_pswd), params=payload)
         my_bot.reply_to(message, self.reply_format(response.text,
                                                    self.time_format(start_date), self.time_format(end_date)),
                         parse_mode="HTML")
+
+    def in_office(self, message):
+        response = requests.get(self.in_url, auth=(tokens.auth_login, tokens.auth_pswd))
+        my_bot.reply_to(message, '👥 ' + response.text)
 
 
 my_data = DataManager()
