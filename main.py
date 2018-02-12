@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # _*_ coding: utf-8 _*_
 import os
-import re
 import time
 
 import requests
@@ -15,22 +14,22 @@ from utils import my_bot, my_bot_name, commands_handler, is_command, bot_admin_c
 
 
 @my_bot.message_handler(func=commands_handler(['/start']))
-def default_messages(message):
+@my_data.command_need_name
+def command_start(message):
     user_action_log(message, "called " + message.text)
-    command = message.text.lower().split()[0]
-    command_raw = re.split("@+", command)[0]
-    with open(config.file_location[command_raw], 'r', encoding='utf-8') as file:
+    with open(config.file_location['/start'], 'r', encoding='utf-8') as file:
         my_bot.reply_to(message, file.read(), parse_mode="HTML", disable_web_page_preview=True)
-    if not my_data.is_registered(message):
-        my_data.register_user(message)
 
 
 @my_bot.message_handler(func=commands_handler(['/restart']))
+@my_data.command_need_name
 def command_restart(message):
+    user_action_log(message, "called " + message.text)
     my_data.register_user(message)
 
 
 @my_bot.message_handler(func=commands_handler(['/year']))
+@my_data.command_need_name
 @command_with_delay(delay=1)
 def command_year(message):
     user_action_log(message, "called " + message.text)
@@ -38,6 +37,7 @@ def command_year(message):
 
 
 @my_bot.message_handler(func=commands_handler(['/month']))
+@my_data.command_need_name
 @command_with_delay(delay=1)
 def command_month(message):
     user_action_log(message, "called " + message.text)
@@ -45,6 +45,7 @@ def command_month(message):
 
 
 @my_bot.message_handler(func=commands_handler(['/week']))
+@my_data.command_need_name
 @command_with_delay(delay=1)
 def command_week(message):
     user_action_log(message, "called " + message.text)
@@ -52,6 +53,7 @@ def command_week(message):
 
 
 @my_bot.message_handler(func=commands_handler(['/day']))
+@my_data.command_need_name
 @command_with_delay(delay=1)
 def command_day(message):
     user_action_log(message, "called " + message.text)
@@ -59,6 +61,7 @@ def command_day(message):
 
 
 @my_bot.message_handler(func=commands_handler(['/in_office']))
+@my_data.command_need_name
 @command_with_delay(delay=1)
 def command_in_office(message):
     user_action_log(message, "called " + message.text)

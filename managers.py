@@ -8,7 +8,7 @@ import requests
 
 import config
 import tokens
-from utils import global_lock, my_bot, is_non_zero_file, bold
+from utils import global_lock, my_bot, is_non_zero_file, bold, user_action_log
 
 
 class DataManager:
@@ -37,15 +37,50 @@ class DataManager:
                 my_bot.reply_to(message, file.read())
             global_lock.release()
 
+    def command_need_name(self, func):
+        def wrapped(message):
+            if not self.is_registered(message) or not self.is_name_set(message):
+                user_action_log(message, "not registered to call: " + message.text)
+                self.register_user(message)
+                return
+            return func(message)
+
+        return wrapped
+
     def is_registered(self, message):
-        return self.data[str(message.from_user.id)] is not None
+        if self.data.get(str(message.from_user.id)) is not None:
+            if self.data.get(str(message.from_user.id)).get('authenticated', 'False') == 'True':
+                return True
+        return False
+
+    def is_name_set(self, message):
+        if self.data.get(str(message.from_user.id)) is not None:
+            if self.data.get(str(message.from_user.id)).get('name') is not None:
+                return True
+        return False
 
     def register_user(self, message):
-        self.data[str(message.from_user.id)] = dict()
-        sent = my_bot.send_message(message.from_user.id,
-                                   bold('Авторизация') + '\n\nТвой номер в СКД? Например: 5059, 5060 и т.д.',
-                                   parse_mode="HTML")
+        if not self.is_registered(message):
+            sent = my_bot.send_message(message.from_user.id,
+                                       bold('Авторизация') + '\n\nВведи пароль:', parse_mode="HTML")
+            my_bot.register_next_step_handler(sent, self.check_password)
+            return
+
+        sent = my_bot.send_message(message.from_user.id, 'Твой номер в СКД? Например: 5059, 5060 и т.д.')
         my_bot.register_next_step_handler(sent, self.set_user_name)
+
+    def check_password(self, message):
+        if tokens.access_pswd != "" and message.text == tokens.access_pswd:
+            if self.data.get(str(message.from_user.id)) is None:
+                self.data[str(message.from_user.id)] = {"authenticated": "True"}
+            else:
+                self.data[str(message.from_user.id)]["authenticated"] = "True"
+            user_action_log(message, "successfully registered")
+            my_bot.reply_to(message, "✅ Пароль верный!")
+            self.register_user(message)
+        else:
+            user_action_log(message, "entered wrong password")
+            my_bot.reply_to(message, "⛔ Пароль не подошел!")
 
     def set_user_name(self, message):
         # Todo: check existing
@@ -55,20 +90,13 @@ class DataManager:
         else:
             my_bot.send_message(message.from_user.id, 'Ошибка, нужно указать номер')
 
-            # sent = my_bot.send_message(message.from_user.id, 'Work time?')
-            # my_bot.register_next_step_handler(sent, self.set_user_week_work_time)
-
-    def set_user_week_work_time(self, message):
-        self.data[str(message.from_user.id)]['week_work_time'] = str(message.text)
-
-        self.register_user_finish(message)
-
     def register_user_finish(self, message):
         self.save()
-        my_bot.send_message(message.from_user.id, 'Вы авторизованы! Теперь можете использовать /week и т.п.')
+        my_bot.send_message(message.from_user.id, 'Теперь можете использовать /week и т.п.\n'
+                                                  'Для смены пользователя вызывайте /restart.')
 
     def get_user_name(self, message):
-        if self.is_registered(message):
+        if self.is_name_set(message):
             return self.data.get(str(message.from_user.id), {}).get('name', '5059')
         else:
             my_bot.reply_to(message, 'Вы не авторизованы! Используйте /restart')
