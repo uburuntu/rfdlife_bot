@@ -75,6 +75,13 @@ def command_chai(message):
     chai.chai(message)
 
 
+@my_bot.message_handler(func=commands_handler(['/ch']))
+@command_with_delay(delay=1)
+def command_ch(message):
+    user_action_log(message, "called " + message.text)
+    chai.chai_message(message)
+
+
 @my_bot.callback_query_handler(func=lambda call: call.data.startswith('chai'))
 def callback_chai(call):
     action_log(user_name(call.message.chat) + " answered to chai")

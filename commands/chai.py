@@ -8,10 +8,11 @@ import config
 from utils import my_bot, user_name, link
 
 
-def chai_subs_notify(text, keyboard=None):
+def chai_subs_notify(text, keyboard=None, me=None):
     for chat_id in config.chai_subscribers:
         try:
-            my_bot.send_message(chat_id, text, parse_mode="HTML", reply_markup=keyboard)
+            if chat_id != me:
+                my_bot.send_message(chat_id, text, parse_mode="HTML", reply_markup=keyboard)
         except:
             pass
 
@@ -22,6 +23,11 @@ def chai(message):
                  types.InlineKeyboardButton(text="Через 5 мин", callback_data="chai_5min"))
     keyboard.add(types.InlineKeyboardButton(text="Нет, позже", callback_data="chai_no"))
     chai_subs_notify(user_name(message.from_user) + " зовет чай! ☕️", keyboard)
+
+
+def chai_message(message):
+    chai_subs_notify(link(user_name(message.from_user), message.from_user.id) + ": " + " ".join(message.text.split()[1:]),
+                     me=message.from_user.id)
 
 
 def chai_callback(call):
