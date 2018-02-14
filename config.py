@@ -19,7 +19,7 @@ file_location = {
 chai_subscribers = [28006241,  # rmbk
                     155094831,  # mix
                     78179118,  # tester
-                    173546332,  # riba
+                    173546332,  # ryba
                     122090167,  # isk
                     100610568,  # nazar
                     211145131]  # kobz
