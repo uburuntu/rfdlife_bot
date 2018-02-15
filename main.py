@@ -60,6 +60,14 @@ def command_day(message):
     my_acs.day_time(message)
 
 
+@my_bot.message_handler(func=commands_handler(['/state']))
+@my_data.command_need_name
+@command_with_delay(delay=1)
+def command_day(message):
+    user_action_log(message, "called " + message.text)
+    my_acs.user_state(message)
+
+
 @my_bot.message_handler(func=commands_handler(['/in_office']))
 @my_data.command_need_name
 @command_with_delay(delay=1)

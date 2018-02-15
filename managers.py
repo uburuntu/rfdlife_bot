@@ -120,6 +120,17 @@ class AcsManager:
                 return nice.format(split[-5], split[-4], start_date, end_date, split[-2], split[-1])
         return text
 
+    @staticmethod
+    def state_format(text):
+        if is_non_zero_file(config.file_location['acs_state_answer']):
+            with open(config.file_location['acs_state_answer'], 'r', encoding='utf-8') as file:
+                split = text.split()
+                nice = file.read()
+                if len(split) > 17:
+                    return nice.format(split[-6], split[-5], 'В офисе' if split[18] == 'Вход' else 'Не в офисе', split[-2])
+                return '🌴 Не в офисе сегодня 🌴'
+        return text
+
     def year_time(self, message):
         today = datetime.today()
         year_start = today.replace(day=1, month=1)
@@ -156,6 +167,16 @@ class AcsManager:
     def in_office(self, message):
         response = requests.get(self.in_url, auth=(tokens.auth_login, tokens.auth_pswd))
         my_bot.reply_to(message, '👥 ' + response.text)
+
+    def user_state(self, message):
+        today = datetime.today()
+
+        payload = (('AcsTabelIntermediadateSearch[staff_id]', my_data.get_user_name(message)),
+                   ('AcsTabelIntermediadateSearch[date_pass_first]', self.time_format(today)),
+                   ('AcsTabelIntermediadateSearch[date_pass_last]', self.time_format(today)))
+
+        response = requests.get(self.acs_url, auth=(tokens.auth_login, tokens.auth_pswd), params=payload)
+        my_bot.reply_to(message, self.state_format(response.text), parse_mode="HTML")
 
 
 my_data = DataManager()
