@@ -174,3 +174,19 @@ def link(text, user_id, mode="html"):
         return "<a href=\"tg://user?id={0}\">{1}</a>".format(user_id, text)
     if mode.lower() == "markdown":
         return "[{1}](tg://user?id={0})".format(user_id, text)
+
+
+def link_user(user, mode="html"):
+    if mode.lower() == "html":
+        return "<a href=\"tg://user?id={0}\">{1}</a>".format(user.id, user_name(user))
+    if mode.lower() == "markdown":
+        return "[{1}](tg://user?id={0})".format(user.id, user_name(user))
+
+
+def subs_notify(subs, text, keyboard=None, me=None):
+    for chat_id in subs:
+        try:
+            if chat_id != me:
+                my_bot.send_message(chat_id, text, parse_mode="HTML", reply_markup=keyboard)
+        except:
+            pass

@@ -127,7 +127,8 @@ class AcsManager:
                 split = text.split()
                 nice = file.read()
                 if len(split) > 17:
-                    return nice.format(split[-6], split[-5], 'В офисе' if split[18] == 'Вход' else 'Не в офисе', split[-2])
+                    return nice.format(split[-6], split[-5], 'В офисе' if split[18] == 'Вход' else 'Не в офисе',
+                                       split[-2])
                 return '🌴 Не в офисе сегодня 🌴'
         return text
 

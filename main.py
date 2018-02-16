@@ -10,7 +10,8 @@ from commands import admin_tools
 from commands import chai
 from managers import my_data, my_acs
 from utils import my_bot, my_bot_name, commands_handler, is_command, bot_admin_command, \
-    action_log, user_action_log, dump_messages, global_lock, message_dump_lock, command_with_delay, user_name
+    action_log, user_action_log, dump_messages, global_lock, message_dump_lock, command_with_delay, user_name, \
+    subs_notify, link_user, bold
 
 
 @my_bot.message_handler(func=commands_handler(['/start']))
@@ -94,6 +95,25 @@ def command_ch(message):
 def callback_chai(call):
     action_log(user_name(call.message.chat) + " answered to chai")
     chai.chai_callback(call)
+
+
+@my_bot.message_handler(func=commands_handler(['/notify_all']))
+@bot_admin_command
+@command_with_delay(delay=1)
+def command_day(message):
+    user_action_log(message, "called " + message.text)
+    split = message.text.split(' ', 1)
+    if len(split) > 1:
+        subs_notify(my_data.data.keys(), '{}:\n\n{}'.format(bold('Оповещение пользователей бота'), split[1]))
+
+
+@my_bot.message_handler(func=commands_handler(['/feedback']))
+@command_with_delay(delay=1)
+def command_day(message):
+    user_action_log(message, "called " + message.text)
+    split = message.text.split(' ', 1)
+    if len(split) > 1:
+        subs_notify(config.admin_ids, 'Обратная связь от {}: {}'.format(link_user(message.from_user), split[1]))
 
 
 @my_bot.message_handler(func=commands_handler(['/dump']))
