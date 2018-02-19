@@ -8,6 +8,7 @@ from datetime import datetime
 from os import path
 
 import telebot
+from apscheduler.schedulers.background import BackgroundScheduler
 
 import config
 import tokens
@@ -15,6 +16,9 @@ import tokens
 # Инициализация бота
 my_bot = telebot.TeleBot(tokens.bot, threaded=False)
 my_bot_name = '@' + my_bot.get_me().username
+
+scheduler = BackgroundScheduler()
+scheduler.start()
 
 global_lock = threading.Lock()
 message_dump_lock = threading.Lock()

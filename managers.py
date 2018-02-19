@@ -3,8 +3,10 @@
 import json
 from calendar import monthrange
 from datetime import datetime, timedelta
+from difflib import unified_diff
 
 import requests
+import sys
 
 import config
 import tokens
@@ -106,6 +108,8 @@ class AcsManager:
     def __init__(self):
         self.acs_url = 'https://corp.rfdyn.ru/index.php/acs-tabel-intermediadate/index-text'
         self.in_url = 'https://corp.rfdyn.ru/index.php/site/now-in-office-text'
+        self.in_office = ''
+        self.in_office_old = ''
 
     @staticmethod
     def time_format(time):
@@ -166,8 +170,21 @@ class AcsManager:
                         parse_mode="HTML")
 
     def in_office(self, message):
+        my_bot.reply_to(message, '👥 ' + self._make_in_office_request())
+
+    def in_office_notify(self):
+        self.in_office = self._make_in_office_request()
+        if self.in_office_old == '':
+            self.in_office_old = self.in_office
+            return
+        diff = unified_diff(self.in_office_old.split('\n'), self.in_office.split('\n'), n=0)
+        for line in diff:
+            print(line)
+        self.in_office_old = self.in_office
+
+    def _make_in_office_request(self):
         response = requests.get(self.in_url, auth=(tokens.auth_login, tokens.auth_pswd))
-        my_bot.reply_to(message, '👥 ' + response.text)
+        return response.text
 
     def user_state(self, message):
         today = datetime.today()
