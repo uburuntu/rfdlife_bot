@@ -11,7 +11,7 @@ from commands import chai
 from managers import my_data, my_acs
 from utils import my_bot, my_bot_name, commands_handler, is_command, bot_admin_command, \
     action_log, user_action_log, dump_messages, global_lock, message_dump_lock, command_with_delay, user_name, \
-    subs_notify, link_user, bold, scheduler
+    subs_notify, link_user, bold, scheduler, cut_long_text
 
 
 @my_bot.message_handler(func=commands_handler(['/start']))
@@ -97,6 +97,17 @@ def callback_chai(call):
     chai.chai_callback(call)
 
 
+@my_bot.message_handler(func=commands_handler(['/feedback']))
+@command_with_delay(delay=1)
+def command_day(message):
+    user_action_log(message, "called " + message.text)
+    split = message.text.split(' ', 1)
+    if len(split) > 1:
+        subs_notify(config.admin_ids, 'Обратная связь от {}: {}'.format(link_user(message.from_user), split[1]))
+    else:
+        my_bot.reply_to(message, 'Использование: /feedback <ваше обращение>')
+
+
 @my_bot.message_handler(func=commands_handler(['/notify_all']))
 @bot_admin_command
 @command_with_delay(delay=1)
@@ -107,15 +118,14 @@ def command_day(message):
         subs_notify(my_data.data.keys(), '{}:\n\n{}'.format(bold('Оповещение пользователей бота'), split[1]))
 
 
-@my_bot.message_handler(func=commands_handler(['/feedback']))
-@command_with_delay(delay=1)
-def command_day(message):
+@my_bot.message_handler(func=commands_handler(['/log']))
+@bot_admin_command
+def get_log(message):
     user_action_log(message, "called " + message.text)
-    split = message.text.split(' ', 1)
-    if len(split) > 1:
-        subs_notify(config.admin_ids, 'Обратная связь от {}: {}'.format(link_user(message.from_user), split[1]))
-    else:
-        my_bot.reply_to(message, 'Использование: /feedback <ваше обращение>')
+    with open(config.file_location['bot_logs'], 'r', encoding='utf-8') as file:
+        lines = file.readlines()[-100:]
+        for text in cut_long_text(''.join(lines), max_len=3500):
+            my_bot.reply_to(message, "{}".format(text))
 
 
 @my_bot.message_handler(func=commands_handler(['/dump']))
