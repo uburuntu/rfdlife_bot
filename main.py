@@ -74,7 +74,7 @@ def command_day(message):
 @command_with_delay(delay=1)
 def command_in_office(message):
     user_action_log(message, "called " + message.text)
-    my_acs.in_office(message)
+    my_acs.in_office_now(message)
 
 
 @my_bot.message_handler(func=commands_handler(['/chai']))
@@ -89,6 +89,27 @@ def command_chai(message):
 def command_ch(message):
     user_action_log(message, "called " + message.text)
     chai.chai_message(message)
+
+
+@my_bot.message_handler(func=commands_handler(['/alert_add']))
+@command_with_delay(delay=1)
+def command_alert_add(message):
+    user_action_log(message, "called " + message.text)
+    my_data.add_alert_name(message)
+
+
+@my_bot.message_handler(func=commands_handler(['/alert_erase']))
+@command_with_delay(delay=1)
+def command_alert_erase(message):
+    user_action_log(message, "called " + message.text)
+    my_data.erase_alert_name(message)
+
+
+@my_bot.message_handler(func=commands_handler(['/alert']))
+@command_with_delay(delay=1)
+def command_alert(message):
+    user_action_log(message, "called " + message.text)
+    my_data.list_alert_name(message)
 
 
 @my_bot.callback_query_handler(func=lambda call: call.data.startswith('chai'))
@@ -160,7 +181,7 @@ while __name__ == '__main__':
 
         action_log("Running bot!")
 
-        scheduler.add_job(my_acs.in_office_notify, 'interval', id='in_office_notify', replace_existing=True, seconds=15)
+        scheduler.add_job(my_acs.in_office_alert, 'interval', id='in_office_notify', replace_existing=True, seconds=60)
 
         # Запуск Long Poll бота
         my_bot.set_update_listener(handle_messages)

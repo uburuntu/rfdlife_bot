@@ -3,10 +3,8 @@
 import json
 from calendar import monthrange
 from datetime import datetime, timedelta
-from difflib import unified_diff
 
 import requests
-import sys
 
 import config
 import tokens
@@ -103,13 +101,47 @@ class DataManager:
         else:
             my_bot.reply_to(message, 'Вы не авторизованы! Используйте /restart')
 
+    def add_alert_name(self, message):
+        split = message.text.split(' ', 1)
+        if len(split) > 1:
+            if self.data[str(message.from_user.id)].get('alert_users') is not None:
+                if self.data[str(message.from_user.id)]['alert_users'].count(split[1]) == 0:
+                    self.data[str(message.from_user.id)]['alert_users'].append(split[1])
+            else:
+                self.data[str(message.from_user.id)]['alert_users'] = [split[1]]
+            self.save()
+            my_bot.reply_to(message, '⚙️ Оповещения о {} включены!'.format(split[1]))
+        else:
+            my_bot.reply_to(message, 'Использование: /alert_add <ФИО из /in_office>')
+
+    def erase_alert_name(self, message):
+        split = message.text.split(' ', 1)
+        if len(split) > 1:
+            if self.data[str(message.from_user.id)].get('alert_users') is not None:
+                if self.data[str(message.from_user.id)]['alert_users'].count(split[1]) != 0:
+                    self.data[str(message.from_user.id)]['alert_users'].remove(split[1])
+                    self.save()
+                    my_bot.reply_to(message, '⚙️ Оповещения о {} выключены!'.format(split[1]))
+                    return
+        my_bot.reply_to(message, 'Использование: /alert_erase <ФИО из /in_office>')
+
+    def list_alert_name(self, message):
+        users = self.data[str(message.from_user.id)].get('alert_users')
+        if users is not None and len(users) > 0:
+            my_bot.reply_to(message, '⚙️ Ваш список оповещений:\n— {}\n\n'
+                                     'Используйте /alert_add и /alert_erase для управления списком.'
+                                     ''.format('\n— '.join(self.data[str(message.from_user.id)].get('alert_users'))))
+        else:
+            my_bot.reply_to(message, '⚙️ Ваш список оповещений пуст.\n\n'
+                                     'Используйте /alert_add и /alert_erase для управления списком.')
+
 
 class AcsManager:
     def __init__(self):
         self.acs_url = 'https://corp.rfdyn.ru/index.php/acs-tabel-intermediadate/index-text'
         self.in_url = 'https://corp.rfdyn.ru/index.php/site/now-in-office-text'
-        self.in_office = ''
-        self.in_office_old = ''
+        self.in_office = set()
+        self.in_office_old = set()
 
     @staticmethod
     def time_format(time):
@@ -169,17 +201,22 @@ class AcsManager:
                                                    self.time_format(start_date), self.time_format(end_date)),
                         parse_mode="HTML")
 
-    def in_office(self, message):
+    def in_office_now(self, message):
         my_bot.reply_to(message, '👥 ' + self._make_in_office_request())
 
-    def in_office_notify(self):
-        self.in_office = self._make_in_office_request()
-        if self.in_office_old == '':
+    def in_office_alert(self):
+        self.in_office = set(self._make_in_office_request().split('\n'))
+        if len(self.in_office_old) == 0:
             self.in_office_old = self.in_office
             return
-        diff = unified_diff(self.in_office_old.split('\n'), self.in_office.split('\n'), n=0)
-        for line in diff:
-            print(line)
+        come = self.in_office - self.in_office_old
+        gone = self.in_office_old - self.in_office
+        for user in my_data.data.keys():
+            for alert_user in my_data.data[str(user)].get('alert_users', []):
+                if alert_user in come:
+                    my_bot.send_message(user, '👨🏻‍💻️ {} сейчас в офисе!'.format(alert_user))
+                if alert_user in gone:
+                    my_bot.send_message(user, '🙇🏻 {} теперь не в офисе!'.format(alert_user))
         self.in_office_old = self.in_office
 
     def _make_in_office_request(self):
