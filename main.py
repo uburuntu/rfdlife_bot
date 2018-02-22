@@ -92,6 +92,7 @@ def command_ch(message):
 
 
 @my_bot.message_handler(func=commands_handler(['/alert_add']))
+@my_data.command_need_name
 @command_with_delay(delay=1)
 def command_alert_add(message):
     user_action_log(message, "called " + message.text)
@@ -99,6 +100,7 @@ def command_alert_add(message):
 
 
 @my_bot.message_handler(func=commands_handler(['/alert_erase']))
+@my_data.command_need_name
 @command_with_delay(delay=1)
 def command_alert_erase(message):
     user_action_log(message, "called " + message.text)
@@ -106,6 +108,7 @@ def command_alert_erase(message):
 
 
 @my_bot.message_handler(func=commands_handler(['/alert']))
+@my_data.command_need_name
 @command_with_delay(delay=1)
 def command_alert(message):
     user_action_log(message, "called " + message.text)
