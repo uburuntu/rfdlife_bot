@@ -8,7 +8,7 @@ import requests
 
 import config
 import tokens
-from utils import global_lock, my_bot, is_non_zero_file, bold, user_action_log
+from utils import global_lock, my_bot, is_non_zero_file, bold, user_action_log, user_name
 
 
 class DataManager:
@@ -27,7 +27,7 @@ class DataManager:
     def save(self):
         global_lock.acquire()
         with open(self.file_name, 'w', encoding='utf-8') as file:
-            json.dump(self.data, file, indent=True)
+            json.dump(self.data, file, indent=True, ensure_ascii=False)
         global_lock.release()
 
     def dump_file(self, message):
@@ -83,6 +83,7 @@ class DataManager:
             my_bot.reply_to(message, "⛔ Пароль не подошел!")
 
     def set_user_name(self, message):
+        my_data.data[str(message.from_user.id)]['who'] = user_name(message.from_user)
         # Todo: check existing
         if message.text.isdigit():
             self.data[str(message.from_user.id)]['name'] = str(message.text)
@@ -128,9 +129,11 @@ class DataManager:
     def list_alert_name(self, message):
         users = self.data[str(message.from_user.id)].get('alert_users')
         if users is not None and len(users) > 0:
-            my_bot.reply_to(message, '⚙️ Ваш список оповещений:\n— {}\n\n'
+            my_bot.reply_to(message, '⚙️ Ваш список оповещений:\n— <code>{}</code>\n\n'
                                      'Используйте /alert_add и /alert_erase для управления списком.'
-                                     ''.format('\n— '.join(self.data[str(message.from_user.id)].get('alert_users'))))
+                                     ''.format('</code>\n— <code>'
+                                               ''.join(self.data[str(message.from_user.id)].get('alert_users'))),
+                            parse_mode='HTML')
         else:
             my_bot.reply_to(message, '⚙️ Ваш список оповещений пуст.\n\n'
                                      'Используйте /alert_add и /alert_erase для управления списком.')
