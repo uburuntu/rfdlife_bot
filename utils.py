@@ -113,6 +113,15 @@ def bot_admin_command(func):
     return wrapped
 
 
+def chai_user_command(func):
+    def wrapped(message):
+        if message.from_user.id in config.chai_subscribers:
+            return func(message)
+        return
+
+    return wrapped
+
+
 def is_non_zero_file(file_path):
     return path.isfile(file_path) and path.getsize(file_path) > 0
 

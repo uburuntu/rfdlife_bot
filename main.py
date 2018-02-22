@@ -11,7 +11,7 @@ from commands import chai
 from managers import my_data, my_acs
 from utils import my_bot, my_bot_name, commands_handler, is_command, bot_admin_command, \
     action_log, user_action_log, dump_messages, global_lock, message_dump_lock, command_with_delay, user_name, \
-    subs_notify, link_user, bold, scheduler, cut_long_text
+    subs_notify, link_user, bold, scheduler, cut_long_text, chai_user_command
 
 
 @my_bot.message_handler(func=commands_handler(['/start']))
@@ -78,6 +78,7 @@ def command_in_office(message):
 
 
 @my_bot.message_handler(func=commands_handler(['/chai']))
+@chai_user_command
 @command_with_delay(delay=15 * 60)
 def command_chai(message):
     user_action_log(message, "called " + message.text)
@@ -85,6 +86,7 @@ def command_chai(message):
 
 
 @my_bot.message_handler(func=commands_handler(['/ch']))
+@chai_user_command
 @command_with_delay(delay=1)
 def command_ch(message):
     user_action_log(message, "called " + message.text)
