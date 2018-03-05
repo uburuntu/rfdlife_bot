@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # _*_ coding: utf-8 _*_
+
 import os
 import time
 
 import requests
 
 import config
-from commands import admin_tools
-from commands import chai
+from commands import admin_tools, birthday, chai
 from managers import my_data, my_acs
 from utils import my_bot, my_bot_name, commands_handler, is_command, bot_admin_command, \
     action_log, user_action_log, dump_messages, global_lock, message_dump_lock, command_with_delay, user_name, \
@@ -141,7 +141,7 @@ def command_day(message):
     user_action_log(message, "called " + message.text)
     split = message.text.split(' ', 1)
     if len(split) > 1:
-        subs_notify(my_data.data.keys(), '{}:\n\n{}'.format(bold('Оповещение пользователей бота'), split[1]))
+        subs_notify(my_data.data.keys(), '{}\n\n{}'.format(bold('Оповещение пользователей бота'), split[1]))
 
 
 @my_bot.message_handler(func=commands_handler(['/log']))
@@ -186,7 +186,8 @@ while __name__ == '__main__':
 
         action_log("Running bot!")
 
-        scheduler.add_job(my_acs.in_office_alert, 'interval', id='in_office_notify', replace_existing=True, seconds=60)
+        scheduler.add_job(my_acs.in_office_alert, 'interval', id='in_office_alert', replace_existing=True, seconds=60)
+        scheduler.add_job(birthday.birthday_check, 'cron', id='birthday_check', replace_existing=True, hour=10)
 
         # Запуск Long Poll бота
         my_bot.set_update_listener(handle_messages)
