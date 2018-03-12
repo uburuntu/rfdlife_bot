@@ -14,8 +14,12 @@ import config
 import tokens
 
 # Инициализация бота
+from botan import Botan
+
 my_bot = telebot.TeleBot(tokens.bot, threaded=False)
 my_bot_name = '@' + my_bot.get_me().username
+
+botan = Botan(tokens.botan_token)
 
 scheduler = BackgroundScheduler()
 scheduler.start()

@@ -15,6 +15,8 @@ import os
 # Important: untrack file to prevent accidential private token pushing:
 # 'git update-index --assume-unchanged tokens.py'
 
+# [ Required ]
+
 default_bot = ""
 bot = os.getenv('RFDLIFE_BOT_TOKEN', default_bot)
 
@@ -26,3 +28,8 @@ auth_pswd = os.getenv('RFDLIFE_BOT_AUTH_PSWD', default_auth_pswd)
 
 default_access_pswd = ""
 access_pswd = os.getenv('RFDLIFE_BOT_ACCESS_PSWD', default_access_pswd)
+
+# [ Optional ]
+
+default_botan_token = ""
+botan_token = os.getenv('RFDLIFE_BOT_BOTAN_TOKEN', default_botan_token)

@@ -7,11 +7,12 @@ import time
 import requests
 
 import config
+import tokens
 from commands import admin_tools, birthday, chai
 from managers import my_data, my_acs
 from utils import my_bot, my_bot_name, commands_handler, is_command, bot_admin_command, \
     action_log, user_action_log, dump_messages, global_lock, message_dump_lock, command_with_delay, user_name, \
-    subs_notify, link_user, bold, scheduler, cut_long_text, chai_user_command
+    subs_notify, link_user, bold, scheduler, cut_long_text, chai_user_command, botan
 
 
 @my_bot.message_handler(func=commands_handler(['/start']))
@@ -184,6 +185,9 @@ def admin_tools(message):
 
 # All messages handler
 def handle_messages(messages):
+    if tokens.botan_token != '':
+        for message in messages:
+            botan.track(message)
     dump_messages(messages)
 
 
