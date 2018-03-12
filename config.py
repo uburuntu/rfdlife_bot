@@ -10,6 +10,7 @@ dump_dir = gen_dir + 'dump/'
 # Пути к файлам
 file_location = {
     '/start': text_dir + 'cmd_start.html',
+    '/help': text_dir + 'cmd_help.html',
     'acs_answer': text_dir + 'acs_answer.html',
     'acs_state_answer': text_dir + 'acs_state_answer.html',
     'bot_logs': gen_dir + 'bot_logs.txt',

@@ -62,11 +62,14 @@ class DataManager:
     def register_user(self, message):
         if not self.is_registered(message):
             sent = my_bot.send_message(message.from_user.id,
-                                       bold('Авторизация') + '\n\nВведи пароль:', parse_mode="HTML")
+                                       bold('❗️ Авторизация') + '\n\nВведи пароль:', parse_mode="HTML")
             my_bot.register_next_step_handler(sent, self.check_password)
             return
 
-        sent = my_bot.send_message(message.from_user.id, 'Твой номер в СКД? Например: 5059, 5060 и т.д.')
+        sent = my_bot.send_message(message.from_user.id,
+                                   '❓ Твой номер в '
+                                   '<a href=\"https://corp.rfdyn.ru/index.php/acs-tabel-intermediadate/\">СКД</a>?\n'
+                                   'Например: 5059, 5060 и т.д.', parse_mode="HTML")
         my_bot.register_next_step_handler(sent, self.set_user_name)
 
     def check_password(self, message):
@@ -80,7 +83,7 @@ class DataManager:
             self.register_user(message)
         else:
             user_action_log(message, "entered wrong password")
-            my_bot.reply_to(message, "⛔ Пароль не подошел!")
+            my_bot.reply_to(message, "⛔ Пароль не подошел!\n\nВызывай /start для новой попытки.")
 
     def set_user_name(self, message):
         my_data.data[str(message.from_user.id)]['who'] = user_name(message.from_user)
@@ -89,18 +92,19 @@ class DataManager:
             self.data[str(message.from_user.id)]['name'] = str(message.text)
             self.register_user_finish(message)
         else:
-            my_bot.send_message(message.from_user.id, 'Ошибка, нужно указать номер')
+            my_bot.send_message(message.from_user.id, '⚠️ Ошибка, нужно указать номер')
 
     def register_user_finish(self, message):
         self.save()
-        my_bot.send_message(message.from_user.id, 'Теперь можете использовать /week и т.п.\n'
-                                                  'Для смены пользователя вызывайте /restart.')
+        my_bot.reply_to(message, '✅ Данные сохранены', parse_mode="HTML", disable_web_page_preview=True)
+        with open(config.file_location['/help'], 'r', encoding='utf-8') as file:
+            my_bot.send_message(message.from_user.id, file.read(), parse_mode="HTML", disable_web_page_preview=True)
 
     def get_user_name(self, message):
         if self.is_name_set(message):
             return self.data.get(str(message.from_user.id), {}).get('name', '5059')
         else:
-            my_bot.reply_to(message, 'Вы не авторизованы! Используйте /restart')
+            my_bot.reply_to(message, '⚠️ Вы не авторизованы! Используйте /reset')
 
     def add_alert_name(self, message):
         split = message.text.split(' ', 1)

@@ -22,7 +22,15 @@ def command_start(message):
         my_bot.reply_to(message, file.read(), parse_mode="HTML", disable_web_page_preview=True)
 
 
-@my_bot.message_handler(func=commands_handler(['/restart']))
+@my_bot.message_handler(func=commands_handler(['/help']))
+@my_data.command_need_name
+def command_start(message):
+    user_action_log(message, "called " + message.text)
+    with open(config.file_location['/help'], 'r', encoding='utf-8') as file:
+        my_bot.reply_to(message, file.read(), parse_mode="HTML", disable_web_page_preview=True)
+
+
+@my_bot.message_handler(func=commands_handler(['/restart', '/reset']))
 @my_data.command_need_name
 def command_restart(message):
     user_action_log(message, "called " + message.text)
