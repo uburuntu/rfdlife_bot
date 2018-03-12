@@ -209,6 +209,8 @@ class AcsManager:
 
     def in_office_alert(self):
         self.in_office = set(self._make_in_office_request().split('\n'))
+        if len(self.in_office) == 0:
+            return
         if len(self.in_office_old) == 0:
             self.in_office_old = self.in_office
             return
