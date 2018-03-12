@@ -205,7 +205,10 @@ class AcsManager:
                         parse_mode="HTML")
 
     def in_office_now(self, message):
-        my_bot.reply_to(message, '👥 ' + self._make_in_office_request())
+        in_office_txt = self._make_in_office_request()
+        for alert_user in my_data.data[str(message.from_user.id)].get('alert_users', []):
+            in_office_txt = in_office_txt.replace(alert_user, bold(alert_user))
+        my_bot.reply_to(message, '👥 ' + in_office_txt, parse_mode="HTML")
 
     def in_office_alert(self):
         self.in_office = set(self._make_in_office_request().split('\n'))
