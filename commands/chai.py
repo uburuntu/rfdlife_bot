@@ -28,7 +28,7 @@ def chai_callback(call):
     if datetime.now().timestamp() - msg.date > 15 * 60:
         my_bot.edit_message_text(chat_id=msg.chat.id, message_id=msg.message_id,
                                  text=msg.text + "\n\n" + "Это сообщение устарело! Используй /chai.")
-        my_bot.answer_callback_query(callback_query_id=call.id, show_alert=True, text="Это сообщение устарело!")
+        my_bot.answer_callback_query(callback_query_id=call.id, show_alert=False, text="Это сообщение устарело!")
         return
 
     text = "heh"
