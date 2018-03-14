@@ -126,6 +126,14 @@ def command_alert(message):
     my_data.list_alert_name(message)
 
 
+@my_bot.message_handler(func=commands_handler(['/birthdays']))
+@my_data.command_need_name
+@command_with_delay(delay=1)
+def command_alert(message):
+    user_action_log(message, "called " + message.text)
+    birthday.birthdays_show(message)
+
+
 @my_bot.callback_query_handler(func=lambda call: call.data.startswith('chai'))
 def callback_chai(call):
     action_log(user_name(call.message.chat) + " answered to chai")

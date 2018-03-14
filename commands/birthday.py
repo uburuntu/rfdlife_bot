@@ -7,31 +7,59 @@ import bs4
 import requests
 
 import tokens
-from managers import my_data
-from utils import subs_notify, action_log
+from managers import my_data, my_acs
+from utils import subs_notify, action_log, my_bot
 
 happy_emoji = ['🔥', '✨', '🎂', '🍰', '🎉', '🎊', '🎁', '🎈']
+
+
+def birthdays_get():
+    url = 'https://corp.rfdyn.ru/'
+    response = requests.get(url, auth=(tokens.auth_login, tokens.auth_pswd))
+    if not response.ok:
+        return []
+
+    soup = bs4.BeautifulSoup(response.text, 'html.parser')
+
+    # Если страница поменяется, то надо перенастроить парсинг
+    col = soup.select('.col-lg-4')[0]
+    drs = col.select('.dates-widget')
+
+    drs_parsed = []
+    for dr in drs:
+        date = dr.select('p')[0].getText()
+        name = dr.select('a')[1].getText()
+        drs_parsed.append((date, name))
+
+    return drs_parsed
 
 
 def birthday_check():
     action_log('Launched birthday check')
 
-    url = 'https://corp.rfdyn.ru/'
-    response = requests.get(url, auth=(tokens.auth_login, tokens.auth_pswd))
-    soup = bs4.BeautifulSoup(response.text, 'html.parser')
+    drs = birthdays_get()
 
-    # Если страница поменяется, то надо перенастроить парсинг
     today = datetime.today().strftime('%d.%m')
-    col = soup.select('.col-lg-4')[0]
-    drs = col.select('.dates-widget')
-
     names = ''
-    for dr in drs:
-        dr_date = dr.select('p')[0].getText()
-        if dr_date == today:
-            name = dr.select('a')[1].getText()
+
+    for date, name in drs:
+        if date == today:
             names += '{} <code>{}</code>\n'.format(random.choice(happy_emoji), name)
 
     if len(names) > 0:
-        text = 'Сегодня день рождения у:\n\n{}\n'.format(names)
+        text = 'Сегодня день рождения у:\n\n{}'.format(names)
         subs_notify(my_data.data.keys(), text)
+
+
+def birthdays_show(message):
+    drs = birthdays_get()
+    if len(drs) == 0:
+        my_bot.reply_to(message, my_acs.asc_unaccessible_error, parse_mode='HTML')
+        return
+
+    text = 'Ближайшие дни рождения {}:\n\n'.format(random.choice(happy_emoji))
+
+    for date, name in drs:
+        text += '{} — <code>{}</code>\n'.format(date, name)
+
+    my_bot.reply_to(message, text, parse_mode='HTML')
