@@ -8,7 +8,7 @@ import requests
 
 import config
 import tokens
-from utils import global_lock, my_bot, is_non_zero_file, bold, user_action_log, user_name
+from utils import global_lock, my_bot, is_non_zero_file, bold, user_action_log, user_name, subs_notify, link_user
 
 
 class DataManager:
@@ -80,6 +80,7 @@ class DataManager:
                 self.data[str(message.from_user.id)]["authenticated"] = "True"
             user_action_log(message, "successfully registered")
             my_bot.reply_to(message, "✅ Пароль верный!")
+            subs_notify(config.admin_ids, '✨ Новый пользователь: {}'.format(link_user(message.from_user)))
             self.register_user(message)
         else:
             user_action_log(message, "entered wrong password")
