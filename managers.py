@@ -150,6 +150,8 @@ class AcsManager:
         self.in_office = set()
         self.in_office_old = set()
 
+        self.asc_unaccessible_error = 'Сервер СКД сейчас недоступен :('
+
     @staticmethod
     def time_format(time):
         return time.strftime('%Y-%m-%d')
@@ -204,9 +206,10 @@ class AcsManager:
                    ('AcsTabelIntermediadateSearch[summary_table]', '1'))
 
         response = requests.get(self.acs_url, auth=(tokens.auth_login, tokens.auth_pswd), params=payload)
-        my_bot.reply_to(message, self.reply_format(response.text,
-                                                   self.time_format(start_date), self.time_format(end_date)),
-                        parse_mode="HTML")
+        answer = self.reply_format(response.text,
+                                   self.time_format(start_date),
+                                   self.time_format(end_date)) if response.ok else self.asc_unaccessible_error
+        my_bot.reply_to(message, answer, parse_mode="HTML")
 
     def in_office_now(self, message):
         in_office_txt = self._make_in_office_request()
@@ -216,13 +219,14 @@ class AcsManager:
 
     def in_office_alert(self):
         self.in_office = set(self._make_in_office_request().split('\n'))
-        if len(self.in_office) == 0:
+        if len(self.in_office) == 1:
             return
         if len(self.in_office_old) == 0:
             self.in_office_old = self.in_office
             return
         come = self.in_office - self.in_office_old
         gone = self.in_office_old - self.in_office
+
         for user in my_data.data.keys():
             for alert_user in my_data.data[str(user)].get('alert_users', []):
                 if alert_user in come:
@@ -233,7 +237,7 @@ class AcsManager:
 
     def _make_in_office_request(self):
         response = requests.get(self.in_url, auth=(tokens.auth_login, tokens.auth_pswd))
-        return response.text
+        return response.text if response.ok else ''
 
     def user_state(self, message):
         today = datetime.today()
@@ -243,7 +247,8 @@ class AcsManager:
                    ('AcsTabelIntermediadateSearch[date_pass_last]', self.time_format(today)))
 
         response = requests.get(self.acs_url, auth=(tokens.auth_login, tokens.auth_pswd), params=payload)
-        my_bot.reply_to(message, self.state_format(response.text), parse_mode="HTML")
+        answer = self.state_format(response.text) if response.ok else self.asc_unaccessible_error
+        my_bot.reply_to(message, answer, parse_mode="HTML")
 
 
 my_data = DataManager()

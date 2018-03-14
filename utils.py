@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # _*_ coding: utf-8 _*_
+
 import pickle
 import re
 import threading
-from builtins import any
 from datetime import datetime
 from os import path
 
@@ -12,10 +12,9 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 import config
 import tokens
-
-# Инициализация бота
 from botan import Botan
 
+# Инициализация бота
 my_bot = telebot.TeleBot(tokens.bot, threaded=False)
 my_bot_name = '@' + my_bot.get_me().username
 
@@ -28,19 +27,14 @@ global_lock = threading.Lock()
 message_dump_lock = threading.Lock()
 
 
-def commands_handler(cmnds, inline=False):
+def commands_handler(cmnds):
     def wrapped(message):
         if not message.text:
             return False
         split_message = re.split(r'[^\w@/]', message.text.lower())
-        if not inline:
-            s = split_message[0]
-            return ((s in cmnds)
-                    or (s.endswith(my_bot_name) and s.split('@')[0] in cmnds))
-        else:
-            return any(cmnd in split_message
-                       or cmnd + my_bot_name in split_message
-                       for cmnd in cmnds)
+
+        s = split_message[0]
+        return (s in cmnds) or (s.endswith(my_bot_name) and s.split('@')[0] in cmnds)
 
     return wrapped
 
