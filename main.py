@@ -8,7 +8,7 @@ import requests
 
 import config
 import tokens
-from commands import admin_tools, birthday, chai, stats
+from commands import admin_tools, birthday, chai, stats, donate
 from managers import my_data, my_acs
 from utils import my_bot, my_bot_name, commands_handler, is_command, bot_admin_command, \
     action_log, user_action_log, dump_messages, global_lock, message_dump_lock, command_with_delay, user_name, \
@@ -16,11 +16,20 @@ from utils import my_bot, my_bot_name, commands_handler, is_command, bot_admin_c
 
 
 @my_bot.message_handler(func=commands_handler(['/start']))
-@my_data.command_need_name
 def command_start(message):
     user_action_log(message, "called " + message.text)
-    with open(config.file_location['/start'], 'r', encoding='utf-8') as file:
-        my_bot.reply_to(message, file.read(), parse_mode="HTML", disable_web_page_preview=True)
+    split = message.text.split()
+    if len(split) == 1:
+        if not my_data.is_registered(message):
+            user_action_log(message, "not registered to call: " + message.text)
+            my_data.register_user(message)
+            return
+        with open(config.file_location['/start'], 'r', encoding='utf-8') as file:
+            my_bot.reply_to(message, file.read(), parse_mode="HTML", disable_web_page_preview=True)
+    else:
+        deep_link = split[1]
+        if deep_link.startswith('donate'):
+            donate.donate(message)
 
 
 @my_bot.message_handler(func=commands_handler(['/help']))
@@ -140,6 +149,24 @@ def command_alert(message):
 def command_alert(message):
     user_action_log(message, "called " + message.text)
     stats.stats(message)
+
+
+@my_bot.message_handler(func=commands_handler(['/donate']))
+@command_with_delay(delay=1)
+def command_alert(message):
+    user_action_log(message, "called " + message.text)
+    donate.donate(message)
+
+
+@my_bot.pre_checkout_query_handler(func=lambda query: True)
+def pre_checkout(pre_checkout_query):
+    donate.pre_checkout(pre_checkout_query)
+
+
+@my_bot.message_handler(content_types=['successful_payment'])
+def got_payment(message):
+    user_action_log(message, "payed money!")
+    donate.got_payment(message)
 
 
 @my_bot.callback_query_handler(func=lambda call: call.data.startswith('chai'))

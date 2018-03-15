@@ -31,5 +31,8 @@ access_pswd = os.getenv('RFDLIFE_BOT_ACCESS_PSWD', default_access_pswd)
 
 # [ Optional ]
 
+default_provider_token = ""
+provider_token = os.getenv('RFDLIFE_BOT_PROVIDER_TOKEN', default_provider_token)
+
 default_botan_token = ""
 botan_token = os.getenv('RFDLIFE_BOT_BOTAN_TOKEN', default_botan_token)
