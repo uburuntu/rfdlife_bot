@@ -8,7 +8,7 @@ import requests
 
 import config
 import tokens
-from commands import admin_tools, birthday, chai
+from commands import admin_tools, birthday, chai, stats
 from managers import my_data, my_acs
 from utils import my_bot, my_bot_name, commands_handler, is_command, bot_admin_command, \
     action_log, user_action_log, dump_messages, global_lock, message_dump_lock, command_with_delay, user_name, \
@@ -132,6 +132,14 @@ def command_alert(message):
 def command_alert(message):
     user_action_log(message, "called " + message.text)
     birthday.birthdays_show(message)
+
+
+@my_bot.message_handler(func=commands_handler(['/stats']))
+@my_data.command_need_name
+@command_with_delay(delay=1)
+def command_alert(message):
+    user_action_log(message, "called " + message.text)
+    stats.stats(message)
 
 
 @my_bot.callback_query_handler(func=lambda call: call.data.startswith('chai'))
