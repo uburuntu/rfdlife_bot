@@ -2,7 +2,7 @@
 # _*_ coding: utf-8 _*_
 from config import file_location
 from managers import my_data
-from utils import my_bot, bold
+from utils import bold, my_bot
 
 
 def stats(message):

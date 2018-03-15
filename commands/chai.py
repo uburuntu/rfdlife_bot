@@ -5,7 +5,7 @@ from datetime import datetime
 from telebot import types
 
 import config
-from utils import my_bot, user_name, link, subs_notify
+from utils import link, my_bot, subs_notify, user_name
 
 
 def chai(message):
