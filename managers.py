@@ -8,7 +8,8 @@ import requests
 
 import config
 import tokens
-from utils import bold, global_lock, is_non_zero_file, link_user, my_bot, subs_notify, user_action_log, user_name
+from utils import bold, global_lock, is_non_zero_file, link_user, my_bot, subs_notify, user_action_log, user_name, \
+    cut_long_text
 
 
 class DataManager:
@@ -34,7 +35,8 @@ class DataManager:
         if is_non_zero_file(self.file_name):
             global_lock.acquire()
             with open(self.file_name, 'r', encoding='utf-8') as file:
-                my_bot.reply_to(message, file.read())
+                for text in cut_long_text(file.read()):
+                    my_bot.reply_to(message, text)
             global_lock.release()
 
     def command_need_name(self, func):

@@ -14,7 +14,7 @@ pip3 install -r requirements.txt
 
 Получить токен бота можно через [@BotFather](https://t.me/BotFather).
 
-Подробнее про способы выставления в файле [tokens.py](https://github.com/GimmeDanger/rfdlife_bot/blob/master/tokens.py).
+Подробнее про способы выставления в файле [tokens.py](https://github.com/uburuntu/rfdlife_bot/blob/master/tokens.py).
 
 ## Связанные сервисы
 

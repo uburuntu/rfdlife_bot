@@ -202,7 +202,7 @@ def get_log(message):
     user_action_log(message, "called " + message.text)
     with open(config.file_location['bot_logs'], 'r', encoding='utf-8') as file:
         lines = file.readlines()[-100:]
-        for text in cut_long_text(''.join(lines), max_len=3500):
+        for text in cut_long_text(''.join(lines)):
             my_bot.reply_to(message, "{}".format(text))
 
 

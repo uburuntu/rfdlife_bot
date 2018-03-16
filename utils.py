@@ -173,7 +173,7 @@ def dump_messages(all_messages):
     message_dump_lock.release()
 
 
-def cut_long_text(text, max_len=4250):
+def cut_long_text(text, max_len=4000):
     """
     Функция для нарезки длинных сообщений по переносу строк или по точке в конце предложения или по пробелу
     :param text: тескт для нарезки
