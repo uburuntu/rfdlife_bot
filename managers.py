@@ -13,7 +13,7 @@ from utils import bold, global_lock, is_non_zero_file, link_user, my_bot, subs_n
 
 
 class DataManager:
-    def __init__(self, file_name=config.file_location['user_data']):
+    def __init__(self, file_name=config.FileLocation.user_data):
         self.file_name = file_name
         self.data = dict()
         self.load()
@@ -100,7 +100,7 @@ class DataManager:
     def register_user_finish(self, message):
         self.save()
         my_bot.reply_to(message, '✅ Данные сохранены', parse_mode="HTML", disable_web_page_preview=True)
-        with open(config.file_location['/help'], 'r', encoding='utf-8') as file:
+        with open(config.FileLocation.cmd_help, 'r', encoding='utf-8') as file:
             my_bot.send_message(message.from_user.id, file.read(), parse_mode="HTML", disable_web_page_preview=True)
 
     def get_user_name(self, message):
@@ -161,8 +161,8 @@ class AcsManager:
 
     @staticmethod
     def reply_format(text, start_date, end_date):
-        if is_non_zero_file(config.file_location['acs_answer']):
-            with open(config.file_location['acs_answer'], 'r', encoding='utf-8') as file:
+        if is_non_zero_file(config.FileLocation.acs_answer):
+            with open(config.FileLocation.acs_answer, 'r', encoding='utf-8') as file:
                 split = text.split()
                 nice = file.read()
                 return nice.format(split[-5], split[-4], start_date, end_date, split[-2], split[-1])
@@ -170,8 +170,8 @@ class AcsManager:
 
     @staticmethod
     def state_format(text):
-        if is_non_zero_file(config.file_location['acs_state_answer']):
-            with open(config.file_location['acs_state_answer'], 'r', encoding='utf-8') as file:
+        if is_non_zero_file(config.FileLocation.acs_state_answer):
+            with open(config.FileLocation.acs_state_answer, 'r', encoding='utf-8') as file:
                 split = text.split()
                 nice = file.read()
                 if len(split) > 17:

@@ -10,7 +10,7 @@ def kill_bot(message):
     if not hasattr(kill_bot, "check_sure"):
         kill_bot.check_sure = True
         return
-    value_to_file(config.file_location['bot_killed'], 1)
+    value_to_file(config.FileLocation.bot_killed, 1)
     my_bot.send_document(message.chat.id, "https://t.me/mechmath/169445",
                          caption="Ухожу на отдых!", reply_to_message_id=message.message_id)
     user_action_log(message, "remotely killed bot.")

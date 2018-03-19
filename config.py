@@ -1,22 +1,23 @@
 # _*_ coding: utf-8 _*_
 
-# Пути к папкам
-data_dir = 'data/'
-text_dir = data_dir
 
-gen_dir = 'gen/'
-dump_dir = gen_dir + 'dump/'
+# Пути к папкам и файлам
+class FileLocation:
+    data_dir = 'data/'
+    text_dir = data_dir
 
-# Пути к файлам
-file_location = {
-    '/start': text_dir + 'cmd_start.html',
-    '/help': text_dir + 'cmd_help.html',
-    'acs_answer': text_dir + 'acs_answer.html',
-    'acs_state_answer': text_dir + 'acs_state_answer.html',
-    'bot_logs': gen_dir + 'bot_logs.txt',
-    'bot_killed': gen_dir + 'they_killed_me.txt',
-    'user_data': gen_dir + 'user_data.json',
-}
+    cmd_start = text_dir + 'cmd_start.html'
+    cmd_help = text_dir + 'cmd_help.html'
+    acs_answer = text_dir + 'acs_answer.html'
+    acs_state_answer = text_dir + 'acs_state_answer.html'
+
+    gen_dir = 'gen/'
+    dump_dir = gen_dir + 'dump/'
+
+    bot_logs = gen_dir + 'bot_logs.txt'
+    bot_killed = gen_dir + 'they_killed_me.txt'
+    user_data = gen_dir + 'user_data.json'
+
 
 chai_subscribers = [28006241,  # rmbk
                     155094831,  # mix

@@ -24,7 +24,7 @@ def command_start(message):
             user_action_log(message, "not registered to call: " + message.text)
             my_data.register_user(message)
             return
-        with open(config.file_location['/start'], 'r', encoding='utf-8') as file:
+        with open(config.FileLocation.cmd_start, 'r', encoding='utf-8') as file:
             my_bot.reply_to(message, file.read(), parse_mode="HTML", disable_web_page_preview=True)
     else:
         deep_link = split[1]
@@ -36,7 +36,7 @@ def command_start(message):
 @my_data.command_need_name
 def command_start(message):
     user_action_log(message, "called " + message.text)
-    with open(config.file_location['/help'], 'r', encoding='utf-8') as file:
+    with open(config.FileLocation.cmd_help, 'r', encoding='utf-8') as file:
         my_bot.reply_to(message, file.read(), parse_mode="HTML", disable_web_page_preview=True)
 
 
@@ -200,7 +200,7 @@ def command_day(message):
 @bot_admin_command
 def get_log(message):
     user_action_log(message, "called " + message.text)
-    with open(config.file_location['bot_logs'], 'r', encoding='utf-8') as file:
+    with open(config.FileLocation.bot_logs, 'r', encoding='utf-8') as file:
         lines = file.readlines()[-100:]
         for text in cut_long_text(''.join(lines)):
             my_bot.reply_to(message, "{}".format(text))
@@ -236,8 +236,8 @@ def handle_messages(messages):
 
 while __name__ == '__main__':
     try:
-        if os.path.isfile(config.file_location['bot_killed']):
-            os.remove(config.file_location['bot_killed'])
+        if os.path.isfile(config.FileLocation.bot_killed):
+            os.remove(config.FileLocation.bot_killed)
 
         action_log("Running bot!")
 

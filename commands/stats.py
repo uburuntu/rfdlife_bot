@@ -3,7 +3,7 @@
 import re
 from collections import Counter
 
-from config import file_location
+import config
 from managers import my_data
 from utils import bold, my_bot
 
@@ -15,7 +15,7 @@ def stats(message):
     for chat_id, user in my_data.data.items():
         alerts_count += len(user.get('alert_users', []))
 
-    with open(file_location['bot_logs'], 'r', encoding='utf-8') as file:
+    with open(config.FileLocation.bot_logs, 'r', encoding='utf-8') as file:
         file_text = file.read()
         users = re.findall('(?:User )(\d+)(?:.*called)', file_text)
         commands = re.findall('(?:User.*called )(\/\w*)(?:\s)', file_text)
