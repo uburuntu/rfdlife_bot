@@ -156,7 +156,7 @@ def command_alert(message):
 @command_with_delay(delay=1)
 def command_playroom(message):
     user_action_log(message, "called " + message.text)
-    # playroom.playroom_show(message)
+    playroom.playroom_show(message)
 
 
 @my_bot.message_handler(func=commands_handler(['/donate']))

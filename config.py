@@ -17,6 +17,8 @@ class FileLocation:
     bot_logs = gen_dir + 'bot_logs.txt'
     bot_killed = gen_dir + 'they_killed_me.txt'
     user_data = gen_dir + 'user_data.json'
+    last_frame = gen_dir + 'last_frame.jpg'
+    last_frame_orig = gen_dir + 'last_frame_orig.jpg'
 
 
 chai_subscribers = [28006241,  # rmbk
