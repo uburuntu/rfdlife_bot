@@ -8,7 +8,7 @@ import requests
 
 import config
 import tokens
-from commands import admin_tools, birthday, chai, donate, stats
+from commands import admin_tools, birthday, chai, donate, stats, playroom
 from managers import my_acs, my_data
 from utils import action_log, bold, bot_admin_command, botan, chai_user_command, command_with_delay, commands_handler, \
     cut_long_text, dump_messages, global_lock, is_command, link_user, message_dump_lock, my_bot, my_bot_name, scheduler, \
@@ -149,6 +149,14 @@ def command_alert(message):
 def command_alert(message):
     user_action_log(message, "called " + message.text)
     stats.stats(message)
+
+
+@my_bot.message_handler(func=commands_handler(['/playroom']))
+@my_data.command_need_name
+@command_with_delay(delay=1)
+def command_playroom(message):
+    user_action_log(message, "called " + message.text)
+    # playroom.playroom_show(message)
 
 
 @my_bot.message_handler(func=commands_handler(['/donate']))
