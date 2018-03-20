@@ -159,6 +159,14 @@ def command_playroom(message):
     playroom.playroom_show(message)
 
 
+@my_bot.message_handler(func=commands_handler(['/kitchen']))
+@my_data.command_need_name
+@command_with_delay(delay=1)
+def command_playroom(message):
+    user_action_log(message, "called " + message.text)
+    playroom.kitchen_show(message)
+
+
 @my_bot.message_handler(func=commands_handler(['/donate']))
 @command_with_delay(delay=1)
 def command_alert(message):

@@ -7,25 +7,35 @@ import config
 from utils import my_bot, curr_time
 
 
-class PlayroomView:
+class CamerasView:
     def __init__(self, use_yolo=False):
-        self.camera_link = 'http://video.local.rfdyn.ru:10090/video10.mjpg'
-        self.capture = cv2.VideoCapture(self.camera_link)
+        self.capture = cv2.VideoCapture(self.get_stream_link())
 
         self.use_yolo = use_yolo
 
         if self.use_yolo and False:
             import os, sys
+
             darknet_dir = os.path.join(os.path.dirname(__file__), 'yolo', 'darknet', 'python')
             sys.path.append(darknet_dir)
             import darknet as dn
 
             dn.set_gpu(0)
             self.dn_net = dn.load_net(
-                b"/home/ramzan.bekbulatov/study/rfdlife_bot/commands/yolo/darknet/cfg/tiny-yolo-voc.cfg",
-                b"/home/ramzan.bekbulatov/study/rfdlife_bot/commands/yolo/tiny-yolo-voc.weights", 0)
+                    b"/home/ramzan.bekbulatov/study/rfdlife_bot/commands/yolo/darknet/cfg/tiny-yolo-voc.cfg",
+                    b"/home/ramzan.bekbulatov/study/rfdlife_bot/commands/yolo/tiny-yolo-voc.weights", 0)
 
             self.dn_meta = dn.load_meta(b"/home/ramzan.bekbulatov/study/rfdlife_bot/commands/yolo/darknet/cfg/voc.data")
+
+    @staticmethod
+    def get_stream_link():
+        return NotImplemented
+
+    def get_file_name(self):
+        return config.FileLocation.gen_dir + self.__class__.__name__ + '.jpg'
+
+    def get_file_name_orig(self):
+        return config.FileLocation.gen_dir + self.__class__.__name__ + '_orig.jpg'
 
     @staticmethod
     def detect():
@@ -55,19 +65,23 @@ class PlayroomView:
     def create_frame(self):
         ret, frame = self.capture.read()
         if ret:
-            cv2.imwrite(config.FileLocation.last_frame_orig, frame)
+            cv2.imwrite(self.get_file_name_orig(), frame)
+        else:
+            self.capture = cv2.VideoCapture(self.get_stream_link())
+        return ret
 
     def get_image(self):
-        self.create_frame()
-        self.draw_info()
-        return open(config.FileLocation.last_frame, 'rb')
+        ret = self.create_frame()
+        if ret:
+            self.draw_info()
+        return open(self.get_file_name(), 'rb')
 
     def draw_info(self):
         detections = []
         if self.use_yolo:
             detections = self.detect()
 
-        frame = cv2.imread(config.FileLocation.last_frame_orig)
+        frame = cv2.imread(self.get_file_name_orig())
         for detection in detections:
             object_class = str(detection[0])[2:-1]
             coords = detection[2]
@@ -82,16 +96,36 @@ class PlayroomView:
         text = curr_time()
         cv2.putText(frame, text, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, 255, 1)
 
-        cv2.imwrite(config.FileLocation.last_frame, frame)
+        cv2.imwrite(self.get_file_name(), frame)
+
+
+class PlayroomView(CamerasView):
+    @staticmethod
+    def get_stream_link():
+        return 'http://video.local.rfdyn.ru:10090/video10.mjpg'
+
+
+class KitchenView(CamerasView):
+    @staticmethod
+    def get_stream_link():
+        return 'http://video.local.rfdyn.ru:10090/video8.mjpg'
 
 
 playroom_view = PlayroomView()
+kitchen_view = KitchenView()
 
 
 def playroom_show(message):
     my_bot.send_chat_action(message.chat.id, 'upload_photo')
     img = playroom_view.get_image()
-    my_bot.send_photo(message.chat.id, img, caption=curr_time() + '')
+    my_bot.send_photo(message.chat.id, img, caption='', reply_to_message_id=message.message_id)
+    img.close()
+
+
+def kitchen_show(message):
+    my_bot.send_chat_action(message.chat.id, 'upload_photo')
+    img = kitchen_view.get_image()
+    my_bot.send_photo(message.chat.id, img, caption='', reply_to_message_id=message.message_id)
     img.close()
 
 
