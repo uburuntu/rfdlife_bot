@@ -146,7 +146,8 @@ def value_to_file(file_name, value):
 def dump_messages(all_messages):
     groups = {}
     for message in all_messages:
-        dump_filename = config.FileLocation.dump_dir + 'dump_' + message.chat.type + '_' + str(message.chat.id) + '.pickle'
+        dump_filename = config.FileLocation.dump_dir + 'dump_' + message.chat.type + '_' + str(
+            message.chat.id) + '.pickle'
         if dump_filename in groups:
             lst = groups[dump_filename]
         else:

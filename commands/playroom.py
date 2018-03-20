@@ -4,16 +4,15 @@
 import cv2
 
 import config
-from utils import my_bot, curr_time
+from utils import curr_time, my_bot
 
 
 class CamerasView:
     def __init__(self, use_yolo=False):
-        self.capture = cv2.VideoCapture(self.get_stream_link())
-
+        self.capture = None
         self.use_yolo = use_yolo
 
-        if self.use_yolo and False:
+        if self.use_yolo:
             import os, sys
 
             darknet_dir = os.path.join(os.path.dirname(__file__), 'yolo', 'darknet', 'python')
@@ -56,6 +55,7 @@ class CamerasView:
                                               140.033203125, 77.02155303955078))]
 
     def show_camera(self):
+        self.capture = cv2.VideoCapture(self.get_stream_link())
         while True:
             ret, frame = self.capture.read()
             cv2.imshow('Camera', frame)
@@ -63,11 +63,11 @@ class CamerasView:
                 exit(0)
 
     def create_frame(self):
+        self.capture = cv2.VideoCapture(self.get_stream_link())
         ret, frame = self.capture.read()
         if ret:
             cv2.imwrite(self.get_file_name_orig(), frame)
-        else:
-            self.capture = cv2.VideoCapture(self.get_stream_link())
+        self.capture.release()
         return ret
 
     def get_image(self):

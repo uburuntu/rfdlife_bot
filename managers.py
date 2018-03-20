@@ -8,8 +8,8 @@ import requests
 
 import config
 import tokens
-from utils import bold, global_lock, is_non_zero_file, link_user, my_bot, subs_notify, user_action_log, user_name, \
-    cut_long_text
+from utils import bold, cut_long_text, global_lock, is_non_zero_file, link_user, my_bot, subs_notify, user_action_log, \
+    user_name
 
 
 class DataManager:
