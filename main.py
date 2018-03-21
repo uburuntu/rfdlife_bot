@@ -191,6 +191,12 @@ def callback_chai(call):
     chai.chai_callback(call)
 
 
+@my_bot.callback_query_handler(func=lambda call: call.data.startswith('in_office'))
+def callback_chai(call):
+    action_log(user_name(call.message.chat) + " updated in_office")
+    my_acs.in_office_update(call)
+
+
 @my_bot.message_handler(func=commands_handler(['/feedback']))
 @command_with_delay(delay=1)
 def command_day(message):
@@ -259,6 +265,8 @@ while __name__ == '__main__':
 
         scheduler.add_job(my_acs.in_office_alert, 'interval', id='in_office_alert', replace_existing=True, seconds=60)
         scheduler.add_job(birthday.birthday_check, 'cron', id='birthday_check', replace_existing=True, hour=10)
+        
+        # my_bot.skip_pending = True
 
         # Запуск Long Poll бота
         my_bot.set_update_listener(handle_messages)

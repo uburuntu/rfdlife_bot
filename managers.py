@@ -5,6 +5,7 @@ from calendar import monthrange
 from datetime import datetime, timedelta
 
 import requests
+from telebot import types
 
 import config
 import tokens
@@ -155,6 +156,9 @@ class AcsManager:
 
         self.asc_unaccessible_error = 'Сервер СКД сейчас недоступен :('
 
+        self.keyboard = types.InlineKeyboardMarkup()
+        self.keyboard.add(types.InlineKeyboardButton(text="🔄", callback_data="in_office_update"))
+
     @staticmethod
     def time_format(time):
         return time.strftime('%Y-%m-%d')
@@ -214,11 +218,23 @@ class AcsManager:
                                    self.time_format(end_date)) if response.ok else self.asc_unaccessible_error
         my_bot.reply_to(message, answer, parse_mode="HTML")
 
-    def in_office_now(self, message):
+    def in_office_now_text(self, user_id=0):
         in_office_txt = self._make_in_office_request()
-        for alert_user in my_data.data[str(message.from_user.id)].get('alert_users', []):
+        for alert_user in my_data.data.get(str(user_id), {}).get('alert_users', []):
             in_office_txt = in_office_txt.replace(alert_user, bold(alert_user))
-        my_bot.reply_to(message, '👥 ' + in_office_txt, parse_mode="HTML")
+        return '👥 ' + in_office_txt
+
+    def in_office_now(self, message):
+        text = self.in_office_now_text(message.from_user.id)
+        my_bot.reply_to(message, text, reply_markup=self.keyboard, parse_mode="HTML")
+
+    def in_office_update(self, call):
+        message = call.message
+        text = self.in_office_now_text(message.chat.id)
+        my_bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=text, parse_mode="HTML")
+        my_bot.edit_message_reply_markup(chat_id=message.chat.id, message_id=message.message_id,
+                                         reply_markup=self.keyboard)
+        my_bot.answer_callback_query(callback_query_id=call.id, show_alert=False, text="✅  Данные обновлены")
 
     def in_office_alert(self):
         self.in_office = set(self._make_in_office_request().split('\n'))

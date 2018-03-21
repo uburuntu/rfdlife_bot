@@ -5,7 +5,7 @@ from datetime import datetime
 from telebot import types
 
 import config
-from utils import link, my_bot, subs_notify, user_name
+from utils import link, my_bot, subs_notify, user_name, link_user
 
 
 def chai(message):
@@ -18,8 +18,7 @@ def chai(message):
 
 def chai_message(message):
     subs_notify(config.chai_subscribers,
-                link(user_name(message.from_user), message.from_user.id) + ": " + " ".join(message.text.split()[1:]),
-                me=message.from_user.id)
+                link_user(message.from_user) + ": " + " ".join(message.text.split()[1:]), me=message.from_user.id)
 
 
 def chai_callback(call):
