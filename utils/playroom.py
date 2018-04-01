@@ -4,7 +4,7 @@
 import cv2
 
 import config
-from utils import curr_time, my_bot
+from utils.common_utils import curr_time, my_bot
 
 
 class CamerasView:

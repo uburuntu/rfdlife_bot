@@ -4,8 +4,8 @@ import re
 from collections import Counter
 
 import config
-from managers import my_data
-from utils import bold, my_bot
+from utils.common_utils import bold, my_bot
+from utils.data_manager import my_data
 
 
 def stats(message):
@@ -18,7 +18,7 @@ def stats(message):
     with open(config.FileLocation.bot_logs, 'r', encoding='utf-8') as file:
         file_text = file.read()
         users = re.findall('(?:User )(\d+)(?:.*called)', file_text)
-        commands = re.findall('(?:User.*called )(\/\w*)(?:\s)', file_text)
+        commands = re.findall('(?:User.*called )(/\w*)(?:\s)', file_text)
 
     user_counter = Counter(users)
     user_id = str(message.from_user.id)

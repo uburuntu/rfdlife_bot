@@ -12,7 +12,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 import config
 import tokens
-from botan import Botan
+from utils.botan import Botan
 
 # Инициализация бота
 my_bot = telebot.TeleBot(tokens.bot, threaded=False)

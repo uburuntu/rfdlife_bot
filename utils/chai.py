@@ -4,7 +4,7 @@
 from telebot import types
 
 import config
-from utils import link, my_bot, subs_notify, user_name, link_user
+from utils.common_utils import link, my_bot, subs_notify, user_name, link_user
 
 
 def chai(message):

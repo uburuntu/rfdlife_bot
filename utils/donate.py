@@ -3,7 +3,7 @@
 from telebot.types import LabeledPrice
 
 import tokens
-from utils import my_bot
+from utils.common_utils import my_bot
 
 
 def donate(message):

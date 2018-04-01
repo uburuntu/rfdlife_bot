@@ -3,7 +3,7 @@
 import os
 
 import config
-from utils import my_bot, user_action_log, value_to_file
+from utils.common_utils import my_bot, user_action_log, value_to_file
 
 
 def kill_bot(message):
@@ -24,4 +24,4 @@ def update_bot(message):
 
     my_bot.reply_to(message, "Ух, ухожу на обновление...")
     user_action_log(message, "remotely ran update script.")
-    os.execl('/bin/bash', 'bash', 'bot_update.sh')
+    os.execl('/bin/bash', 'bash', 'utils/__bot_update.sh')

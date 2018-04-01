@@ -105,4 +105,4 @@ gen/
 .idea
 
 # 3rd Party
-commands/yolo/
+utils/yolo/
