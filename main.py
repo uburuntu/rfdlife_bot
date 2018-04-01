@@ -12,7 +12,7 @@ from commands import admin_tools, birthday, chai, donate, playroom, stats
 from managers import my_acs, my_data
 from utils import action_log, bold, bot_admin_command, botan, chai_user_command, command_with_delay, commands_handler, \
     cut_long_text, dump_messages, global_lock, is_command, link_user, message_dump_lock, my_bot, my_bot_name, scheduler, \
-    subs_notify, user_action_log, user_name
+    subs_notify, user_action_log, user_name, check_outdated_callback
 
 
 @my_bot.message_handler(func=commands_handler(['/start']))
@@ -193,6 +193,7 @@ def got_payment(message):
 
 
 @my_bot.callback_query_handler(func=lambda call: call.data.startswith('chai'))
+@check_outdated_callback(delay=15 * 60, cmd='/chai')
 def callback_chai(call):
     user_action_log(call, "callbacked " + call.data)
     chai.chai_callback(call)
@@ -205,6 +206,7 @@ def callback_in_office(call):
 
 
 @my_bot.callback_query_handler(func=lambda call: call.data.startswith('settings'))
+@check_outdated_callback(delay=24 * 60 * 60, cmd='/settings')
 def callback_settings(call):
     user_action_log(call, "callbacked " + call.data)
     my_data.get_user_settings(call.from_user).settings_update(call)

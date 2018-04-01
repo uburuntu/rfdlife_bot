@@ -238,11 +238,6 @@ class UserSettings:
 
     def settings_update(self, call):
         message = call.message
-        if datetime.now().timestamp() - message.date > 24 * 60 * 60:
-            my_bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id,
-                                     text=message.text + "\n\n" + "Это сообщение устарело! Используй /settings.")
-            my_bot.answer_callback_query(callback_query_id=call.id, show_alert=False, text="Это сообщение устарело!")
-            return
 
         setting_name = call.data.split('_', 1)[1]
         if setting_name == 'dummy':

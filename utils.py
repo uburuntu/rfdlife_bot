@@ -123,6 +123,23 @@ def chai_user_command(func):
     return wrapped
 
 
+def check_outdated_callback(delay, cmd):
+    def my_decorator(func):
+        def wrapped(call):
+            message = call.message
+            if datetime.now().timestamp() - message.date > delay:
+                my_bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id,
+                                         text='{}\n\nЭто сообщение устарело! Используй {}.'.format(message.text, cmd))
+                my_bot.answer_callback_query(callback_query_id=call.id, text="Это сообщение устарело!")
+                return
+
+            return func(call)
+
+        return wrapped
+
+    return my_decorator
+
+
 def is_non_zero_file(file_path):
     return path.isfile(file_path) and path.getsize(file_path) > 0
 
