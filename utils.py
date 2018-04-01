@@ -73,7 +73,10 @@ def action_log(text):
 
 
 def user_action_log(message, text):
-    print("{}, {}\nUser {} {}\n".format(curr_time(), chat_info(message.chat), user_info(message.from_user), text))
+    if hasattr(message, 'chat'):
+        print("{}, {}\nUser {} {}\n".format(curr_time(), chat_info(message.chat), user_info(message.from_user), text))
+    else:
+        print("{}\nUser {} {}\n".format(curr_time(), user_info(message.from_user), text))
 
 
 def is_command():

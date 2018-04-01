@@ -174,6 +174,13 @@ def command_alert(message):
     donate.donate(message)
 
 
+@my_bot.message_handler(func=commands_handler(['/settings']))
+@command_with_delay(delay=1)
+def command_settings(message):
+    user_action_log(message, "called " + message.text)
+    my_data.get_user_settings(message.from_user).show_settings_message(message)
+
+
 @my_bot.pre_checkout_query_handler(func=lambda query: True)
 def pre_checkout(pre_checkout_query):
     donate.pre_checkout(pre_checkout_query)
@@ -187,14 +194,21 @@ def got_payment(message):
 
 @my_bot.callback_query_handler(func=lambda call: call.data.startswith('chai'))
 def callback_chai(call):
-    action_log(user_name(call.message.chat) + " answered to chai")
+    user_action_log(call, "callbacked " + call.data)
     chai.chai_callback(call)
 
 
 @my_bot.callback_query_handler(func=lambda call: call.data.startswith('in_office'))
-def callback_chai(call):
-    action_log(user_name(call.message.chat) + " updated in_office")
+def callback_in_office(call):
+    user_action_log(call, "callbacked " + call.data)
     my_acs.in_office_update(call)
+
+
+@my_bot.callback_query_handler(func=lambda call: call.data.startswith('settings'))
+def callback_settings(call):
+    user_action_log(call, "callbacked " + call.data)
+    my_data.get_user_settings(call.from_user).settings_update(call)
+    my_data.save()
 
 
 @my_bot.message_handler(func=commands_handler(['/feedback']))

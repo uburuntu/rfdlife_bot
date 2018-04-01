@@ -13,6 +13,33 @@ from utils import bold, cut_long_text, global_lock, is_non_zero_file, link_user,
     user_name
 
 
+class DataJsonEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, UserSettings):
+            obj.data['__type__'] = obj.__class__.__name__
+            return obj.data
+        return json.JSONEncoder.default(self, obj)
+
+
+class DataJsonDecoder(json.JSONDecoder):
+    def __init__(self, *args, **kargs):
+        json.JSONDecoder.__init__(self, object_hook=self.dict_to_object, *args, **kargs)
+
+    @staticmethod
+    def dict_to_object(d):
+        if '__type__' not in d:
+            return d
+
+        obj_type = d.pop('__type__')
+        try:
+            if obj_type == UserSettings.__name__:
+                obj = UserSettings(d)
+                return obj
+        except:
+            d['__type__'] = obj_type
+        return d
+
+
 class DataManager:
     def __init__(self, file_name=config.FileLocation.user_data):
         self.file_name = file_name
@@ -23,13 +50,13 @@ class DataManager:
         if is_non_zero_file(self.file_name):
             global_lock.acquire()
             with open(self.file_name, 'r', encoding='utf-8') as file:
-                self.data = json.load(file)
+                self.data = json.load(file, cls=DataJsonDecoder)
             global_lock.release()
 
     def save(self):
         global_lock.acquire()
         with open(self.file_name, 'w', encoding='utf-8') as file:
-            json.dump(self.data, file, indent=True, ensure_ascii=False)
+            json.dump(self.data, file, cls=DataJsonEncoder, indent=True, ensure_ascii=False)
         global_lock.release()
 
     def dump_file(self, message):
@@ -99,6 +126,7 @@ class DataManager:
             my_bot.send_message(message.from_user.id, '⚠️ Ошибка, нужно указать номер')
 
     def register_user_finish(self, message):
+        my_data.data[str(message.from_user.id)]['settings'] = UserSettings()
         self.save()
         my_bot.reply_to(message, '✅ Данные сохранены', parse_mode="HTML", disable_web_page_preview=True)
         with open(config.FileLocation.cmd_help, 'r', encoding='utf-8') as file:
@@ -109,6 +137,12 @@ class DataManager:
             return self.data.get(str(message.from_user.id), {}).get('name', '5059')
         else:
             my_bot.reply_to(message, '⚠️ Вы не авторизованы! Используйте /reset')
+
+    def get_user_settings(self, user):
+        user = self.data[str(user.id)]
+        if user.get('settings') is None:
+            user['settings'] = UserSettings()
+        return user['settings']
 
     def add_alert_name(self, message):
         split = message.text.split(' ', 1)
@@ -139,12 +173,93 @@ class DataManager:
         if users is not None and len(users) > 0:
             my_bot.reply_to(message, '⚙️ Ваш список оповещений:\n— <code>{}</code>\n\n'
                                      'Используйте /alert_add и /alert_erase для управления списком.'
-                                     ''.format('</code>\n— <code>'
-                                               ''.join(self.data[str(message.from_user.id)].get('alert_users'))),
-                            parse_mode='HTML')
+                                     ''.format('</code>\n— <code>'.join(users)), parse_mode='HTML')
         else:
             my_bot.reply_to(message, '⚙️ Ваш список оповещений пуст.\n\n'
                                      'Используйте /alert_add и /alert_erase для управления списком.')
+
+
+class Setting:
+    def __init__(self, show_name, statuses, statuses_emoji):
+        self.show_name = show_name
+
+        if len(statuses) != len(statuses_emoji):
+            raise RuntimeError
+        self.statuses = statuses
+        self.statuses_emoji = statuses_emoji
+        self.len = len(statuses)
+        self.curr = 0
+
+    def get(self):
+        return self.statuses[self.curr]
+
+    def set(self, status):
+        self.curr = self.statuses.index(status)
+
+    def get_emoji(self):
+        return self.statuses_emoji[self.curr]
+
+    def defaultify(self):
+        self.curr = 0
+
+    def next(self):
+        self.curr = (self.curr + 1) % self.len
+
+
+class UserSettings:
+    def __init__(self, data=None):
+        self.settings_info = {'morning_birthdays': Setting('Дни рождения:', ['on', 'off'], ['🔔', '🔕'])}
+
+        if data is None:
+            self.data = {}
+            self.defaultify_all()
+        else:
+            self.data = data
+            for name, setting in self.settings_info.items():
+                if self.data.get(name) is not None:
+                    setting.set(self.data[name])
+
+    def defaultify_all(self):
+        for name, setting in self.settings_info.items():
+            setting.defaultify()
+            self.data[name] = setting.get()
+
+    def show_settings_message(self, message):
+        my_bot.reply_to(message, 'Ваши настройки:', reply_markup=self.generate_settings_buttons())
+
+    def generate_settings_buttons(self):
+        keyboard = types.InlineKeyboardMarkup()
+        keyboard.row(types.InlineKeyboardButton(text="Оповещения:", callback_data="settings_dummy"))
+        for name, setting in self.settings_info.items():
+            keyboard.row(types.InlineKeyboardButton(text=setting.show_name, callback_data="settings_dummy"),
+                         types.InlineKeyboardButton(text=setting.get_emoji(), callback_data="settings_" + name))
+        keyboard.row(types.InlineKeyboardButton(text="❎ Сброс настроек", callback_data="settings_default"))
+        return keyboard
+
+    def settings_update(self, call):
+        message = call.message
+        if datetime.now().timestamp() - message.date > 24 * 60 * 60:
+            my_bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id,
+                                     text=message.text + "\n\n" + "Это сообщение устарело! Используй /settings.")
+            my_bot.answer_callback_query(callback_query_id=call.id, show_alert=False, text="Это сообщение устарело!")
+            return
+
+        setting_name = call.data.split('_', 1)[1]
+        if setting_name == 'dummy':
+            my_bot.answer_callback_query(callback_query_id=call.id)
+            return
+        elif setting_name == 'default':
+            self.defaultify_all()
+        else:
+            for name, setting in self.settings_info.items():
+                if setting_name == name:
+                    setting.next()
+                    self.data[name] = setting.get()
+                    break
+
+        my_bot.answer_callback_query(callback_query_id=call.id, show_alert=False, text="✅  Настройки обновлены")
+        my_bot.edit_message_reply_markup(chat_id=message.chat.id, message_id=message.message_id,
+                                         reply_markup=self.generate_settings_buttons())
 
 
 class AcsManager:
