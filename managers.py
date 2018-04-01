@@ -132,14 +132,18 @@ class DataManager:
         with open(config.FileLocation.cmd_help, 'r', encoding='utf-8') as file:
             my_bot.send_message(message.from_user.id, file.read(), parse_mode="HTML", disable_web_page_preview=True)
 
-    def get_user_name(self, message):
-        if self.is_name_set(message):
-            return self.data.get(str(message.from_user.id), {}).get('name', '5059')
-        else:
-            my_bot.reply_to(message, '⚠️ Вы не авторизованы! Используйте /reset')
+    def list_users(self, for_what=None):
+        all_users = self.data.keys()
+        if for_what is None:
+            return all_users
+        if for_what == 'morning_birthdays':
+            return [user_id for user_id in all_users if self.get_user_settings(user_id)[for_what] == 'on']
 
-    def get_user_settings(self, user):
-        user = self.data[str(user.id)]
+    def get_user_name(self, user_id):
+        return self.data.get(str(user_id), {}).get('name', '5059')
+
+    def get_user_settings(self, user_id):
+        user = self.data[str(user_id)]
         if user.get('settings') is None:
             user['settings'] = UserSettings()
         return user['settings']
@@ -180,11 +184,12 @@ class DataManager:
 
 
 class Setting:
-    def __init__(self, show_name, statuses, statuses_emoji):
+    def __init__(self, show_name, statuses, statuses_emoji, help_text):
         self.show_name = show_name
+        self.help_text = help_text
 
         if len(statuses) != len(statuses_emoji):
-            raise RuntimeError
+            raise IndexError
         self.statuses = statuses
         self.statuses_emoji = statuses_emoji
         self.len = len(statuses)
@@ -208,7 +213,18 @@ class Setting:
 
 class UserSettings:
     def __init__(self, data=None):
-        self.settings_info = {'morning_birthdays': Setting('Дни рождения:', ['on', 'off'], ['🔔', '🔕'])}
+        self.settings_info = {
+            'morning_birthdays':
+                Setting('Дни рождения:', ['on', 'off'], ['🔔', '🔕'],
+                        'Оповещение о днях рождения с утра.\n'
+                        '🔔 — оповещать\n'
+                        '🔕 — отключить оповещения'),
+            'alert_about_users':
+                Setting('Появление сотрудников:', ['on', 'when_in_office', 'off'], ['🔔', '🔔+🖥', '🔕'],
+                        'Оповещение о появлении сотрудников в офисе (команда /alert).\n'
+                        '🔔 — оповещать всегда\n'
+                        '🔔+🖥 — оповещать только, когда я в офисе\n'
+                        '🔕 — отключить оповещения')}
 
         if data is None:
             self.data = {}
@@ -219,19 +235,23 @@ class UserSettings:
                 if self.data.get(name) is not None:
                     setting.set(self.data[name])
 
+    def __getitem__(self, item):
+        return self.data[item]
+
     def defaultify_all(self):
         for name, setting in self.settings_info.items():
             setting.defaultify()
             self.data[name] = setting.get()
 
     def show_settings_message(self, message):
-        my_bot.reply_to(message, 'Ваши настройки:', reply_markup=self.generate_settings_buttons())
+        my_bot.reply_to(message, 'Ваши настройки\n\nПримечание: при нажатии на кнопки слева '
+                                 'появляется описание настройки', reply_markup=self.generate_settings_buttons())
 
     def generate_settings_buttons(self):
         keyboard = types.InlineKeyboardMarkup()
         keyboard.row(types.InlineKeyboardButton(text="Оповещения:", callback_data="settings_dummy"))
         for name, setting in self.settings_info.items():
-            keyboard.row(types.InlineKeyboardButton(text=setting.show_name, callback_data="settings_dummy"),
+            keyboard.row(types.InlineKeyboardButton(text=setting.show_name, callback_data="settings_help_" + name),
                          types.InlineKeyboardButton(text=setting.get_emoji(), callback_data="settings_" + name))
         keyboard.row(types.InlineKeyboardButton(text="❎ Сброс настроек", callback_data="settings_default"))
         return keyboard
@@ -239,18 +259,20 @@ class UserSettings:
     def settings_update(self, call):
         message = call.message
 
-        setting_name = call.data.split('_', 1)[1]
-        if setting_name == 'dummy':
+        cmd_name = call.data.split('_', 1)[1]
+        if cmd_name == 'dummy':
             my_bot.answer_callback_query(callback_query_id=call.id)
             return
-        elif setting_name == 'default':
+        elif cmd_name.startswith('help'):
+            setting_name = cmd_name.split('_', 1)[1]
+            my_bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                         text=self.settings_info[setting_name].help_text)
+            return
+        elif cmd_name == 'default':
             self.defaultify_all()
         else:
-            for name, setting in self.settings_info.items():
-                if setting_name == name:
-                    setting.next()
-                    self.data[name] = setting.get()
-                    break
+            self.settings_info[cmd_name].next()
+            self.data[cmd_name] = self.settings_info[cmd_name].get()
 
         my_bot.answer_callback_query(callback_query_id=call.id, show_alert=False, text="✅  Настройки обновлены")
         my_bot.edit_message_reply_markup(chat_id=message.chat.id, message_id=message.message_id,
@@ -317,7 +339,7 @@ class AcsManager:
         self._make_time_request(message, today, today)
 
     def _make_time_request(self, message, start_date, end_date):
-        payload = (('AcsTabelIntermediadateSearch[staff_id]', my_data.get_user_name(message)),
+        payload = (('AcsTabelIntermediadateSearch[staff_id]', my_data.get_user_name(message.from_user.id)),
                    ('AcsTabelIntermediadateSearch[date_pass_first]', self.time_format(start_date)),
                    ('AcsTabelIntermediadateSearch[date_pass_last]', self.time_format(end_date)),
                    ('AcsTabelIntermediadateSearch[summary_table]', '1'))
@@ -347,6 +369,12 @@ class AcsManager:
         my_bot.answer_callback_query(callback_query_id=call.id, show_alert=False, text="✅  Данные обновлены")
 
     def in_office_alert(self):
+        def need_alert():
+            if my_data.get_user_settings(user_id)['alert_about_users'] == 'on':
+                return True
+            if my_data.get_user_settings(user_id)['alert_about_users'] == 'when_in_office':
+                return self.is_user_in_office(user_id)
+
         self.in_office = set(self._make_in_office_request().split('\n'))
         if len(self.in_office) == 1:
             return
@@ -356,12 +384,13 @@ class AcsManager:
         come = self.in_office - self.in_office_old
         gone = self.in_office_old - self.in_office
 
-        for user in my_data.data.keys():
-            for alert_user in my_data.data[str(user)].get('alert_users', []):
-                if alert_user in come:
-                    my_bot.send_message(user, '👨🏻‍💻️ {} сейчас в офисе!'.format(alert_user))
-                if alert_user in gone:
-                    my_bot.send_message(user, '🙇🏻 {} теперь не в офисе!'.format(alert_user))
+        for user_id, user in my_data.data.items():
+            if need_alert():
+                for alert_user in user.get('alert_users', []):
+                    if alert_user in come:
+                        my_bot.send_message(user_id, '👨🏻‍💻️ {} сейчас в офисе!'.format(alert_user))
+                    if alert_user in gone:
+                        my_bot.send_message(user_id, '🙇🏻 {} теперь не в офисе!'.format(alert_user))
         self.in_office_old = self.in_office
 
     def _make_in_office_request(self):
@@ -371,13 +400,27 @@ class AcsManager:
     def user_state(self, message):
         today = datetime.today()
 
-        payload = (('AcsTabelIntermediadateSearch[staff_id]', my_data.get_user_name(message)),
+        payload = (('AcsTabelIntermediadateSearch[staff_id]', my_data.get_user_name(message.from_user.id)),
                    ('AcsTabelIntermediadateSearch[date_pass_first]', self.time_format(today)),
                    ('AcsTabelIntermediadateSearch[date_pass_last]', self.time_format(today)))
 
         response = requests.get(self.acs_url, auth=(tokens.auth_login, tokens.auth_pswd), params=payload)
         answer = self.state_format(response.text) if response.ok else self.asc_unaccessible_error
         my_bot.reply_to(message, answer, parse_mode="HTML")
+
+    def is_user_in_office(self, user_id):
+        today = datetime.today()
+
+        payload = (('AcsTabelIntermediadateSearch[staff_id]', my_data.get_user_name(user_id)),
+                   ('AcsTabelIntermediadateSearch[date_pass_first]', self.time_format(today)),
+                   ('AcsTabelIntermediadateSearch[date_pass_last]', self.time_format(today)))
+
+        response = requests.get(self.acs_url, auth=(tokens.auth_login, tokens.auth_pswd), params=payload)
+        if response.ok:
+            split = response.text.split()
+            if len(split) > 17:
+                return split[18] == 'Вход'
+        return True
 
 
 my_data = DataManager()

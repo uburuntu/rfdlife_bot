@@ -9,7 +9,7 @@ from utils import bold, my_bot
 
 
 def stats(message):
-    users_count = len(my_data.data.keys())
+    users_count = len(my_data.list_users())
     alerts_count = 0
 
     for chat_id, user in my_data.data.items():

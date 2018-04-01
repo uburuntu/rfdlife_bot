@@ -48,7 +48,7 @@ def birthday_check():
 
     if len(names) > 0:
         text = 'Сегодня день рождения у:\n\n{}'.format(names)
-        subs_notify(my_data.data.keys(), text)
+        subs_notify(my_data.list_users(for_what='morning_birthdays'), text)
 
 
 def birthdays_show(message):

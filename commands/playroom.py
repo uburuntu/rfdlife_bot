@@ -21,8 +21,8 @@ class CamerasView:
 
             dn.set_gpu(0)
             self.dn_net = dn.load_net(
-                    b"/home/ramzan.bekbulatov/study/rfdlife_bot/commands/yolo/darknet/cfg/tiny-yolo-voc.cfg",
-                    b"/home/ramzan.bekbulatov/study/rfdlife_bot/commands/yolo/tiny-yolo-voc.weights", 0)
+                b"/home/ramzan.bekbulatov/study/rfdlife_bot/commands/yolo/darknet/cfg/tiny-yolo-voc.cfg",
+                b"/home/ramzan.bekbulatov/study/rfdlife_bot/commands/yolo/tiny-yolo-voc.weights", 0)
 
             self.dn_meta = dn.load_meta(b"/home/ramzan.bekbulatov/study/rfdlife_bot/commands/yolo/darknet/cfg/voc.data")
 

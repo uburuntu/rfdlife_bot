@@ -12,7 +12,7 @@ from commands import admin_tools, birthday, chai, donate, playroom, stats
 from managers import my_acs, my_data
 from utils import action_log, bold, bot_admin_command, botan, chai_user_command, command_with_delay, commands_handler, \
     cut_long_text, dump_messages, global_lock, is_command, link_user, message_dump_lock, my_bot, my_bot_name, scheduler, \
-    subs_notify, user_action_log, user_name, check_outdated_callback
+    subs_notify, user_action_log, check_outdated_callback
 
 
 @my_bot.message_handler(func=commands_handler(['/start']))
@@ -178,7 +178,7 @@ def command_alert(message):
 @command_with_delay(delay=1)
 def command_settings(message):
     user_action_log(message, "called " + message.text)
-    my_data.get_user_settings(message.from_user).show_settings_message(message)
+    my_data.get_user_settings(message.from_user.id).show_settings_message(message)
 
 
 @my_bot.pre_checkout_query_handler(func=lambda query: True)
@@ -209,7 +209,7 @@ def callback_in_office(call):
 @check_outdated_callback(delay=24 * 60 * 60, cmd='/settings')
 def callback_settings(call):
     user_action_log(call, "callbacked " + call.data)
-    my_data.get_user_settings(call.from_user).settings_update(call)
+    my_data.get_user_settings(call.from_user.id).settings_update(call)
     my_data.save()
 
 
@@ -231,7 +231,7 @@ def command_day(message):
     user_action_log(message, "called " + message.text)
     split = message.text.split(' ', 1)
     if len(split) > 1:
-        subs_notify(my_data.data.keys(), '{}\n\n{}'.format(bold('Оповещение пользователей бота'), split[1]))
+        subs_notify(my_data.list_users(), '{}\n\n{}'.format(bold('Оповещение пользователей бота'), split[1]))
 
 
 @my_bot.message_handler(func=commands_handler(['/log']))
@@ -280,8 +280,8 @@ while __name__ == '__main__':
         action_log("Running bot!")
 
         scheduler.add_job(my_acs.in_office_alert, 'interval', id='in_office_alert', replace_existing=True, seconds=60)
-        scheduler.add_job(birthday.birthday_check, 'cron', id='birthday_check', replace_existing=True, hour=10)
-        
+        scheduler.add_job(birthday.birthday_check, 'cron', id='birthday_check', replace_existing=True, hour=11)
+
         # my_bot.skip_pending = True
 
         # Запуск Long Poll бота
