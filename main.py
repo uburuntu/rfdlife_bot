@@ -39,6 +39,9 @@ def command_start(message):
     user_action_log(message, "called " + message.text)
     with open(config.FileLocation.cmd_help, 'r', encoding='utf-8') as file:
         my_bot.reply_to(message, file.read(), parse_mode="HTML", disable_web_page_preview=True)
+    if message.from_user.id in config.admin_ids:
+        with open(config.FileLocation.cmd_help_admin, 'r', encoding='utf-8') as file:
+            my_bot.reply_to(message, file.read(), parse_mode="HTML", disable_web_page_preview=True)
 
 
 @my_bot.message_handler(func=commands_handler(['/restart', '/reset']))
@@ -253,10 +256,15 @@ def command_dump(message):
 
 
 @my_bot.message_handler(func=commands_handler(['/users']))
-@bot_admin_command
 def command_users(message):
     user_action_log(message, "called " + message.text)
     stats.users(message)
+
+
+@my_bot.message_handler(func=commands_handler(['/commands']))
+def command_commands(message):
+    user_action_log(message, "called " + message.text)
+    stats.commands(message)
 
 
 @my_bot.message_handler(func=is_command())

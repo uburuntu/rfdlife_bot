@@ -64,3 +64,19 @@ def users(message):
         text += '{}. {} — {}\n'.format(count, link(user['who'], user_id), user_commands_count)
         count += 1
     my_bot.reply_to(message, "{}".format(text), parse_mode="HTML")
+
+
+def commands(message):
+    with open(config.FileLocation.bot_logs, 'r', encoding='utf-8') as file:
+        file_text = file.read()
+        commands = re.findall('(?:User.*called )(/\w*)(?:\s)', file_text)
+
+    commands_counter = Counter(commands)
+    commands_most = commands_counter.most_common()
+
+    text = 'Список команд бота:\n\n'
+    count = 1
+    for cmd in commands_most:
+        text += '{}. {} — {}\n'.format(count, *cmd)
+        count += 1
+    my_bot.reply_to(message, "{}".format(text), parse_mode="HTML")

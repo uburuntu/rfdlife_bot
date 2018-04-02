@@ -8,6 +8,7 @@ class FileLocation:
 
     cmd_start = text_dir + 'cmd_start.html'
     cmd_help = text_dir + 'cmd_help.html'
+    cmd_help_admin = text_dir + 'cmd_help_admin.html'
     acs_answer = text_dir + 'acs_answer.html'
     acs_state_answer = text_dir + 'acs_state_answer.html'
 
