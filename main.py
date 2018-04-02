@@ -228,6 +228,25 @@ def command_day(message):
         my_bot.reply_to(message, 'Использование: /feedback <ваше обращение>')
 
 
+@my_bot.message_handler(func=commands_handler(['/reply']))
+@bot_admin_command
+@command_with_delay(delay=1)
+def command_reply(message):
+    user_action_log(message, "called " + message.text)
+    if hasattr(message, "reply_to_message"):
+        split = message.text.split(' ', 1)
+        if len(split) > 1:
+            replying_msg = message.reply_to_message
+            if hasattr(replying_msg, "entities"):
+                user_ids = [x.user.id for x in replying_msg.entities if x.type == 'text_mention']
+                if len(user_ids) == 1:
+                    my_bot.send_message(user_ids[0], '{}: {}'.format(bold('Ответ от разработчика'), split[1]),
+                                        parse_mode='HTML')
+                    my_bot.reply_to(message, 'Сообщение отправлено!')
+                    return
+    my_bot.reply_to(message, 'Использовать с ответом на фидбек: /reply <ваш ответ>')
+
+
 @my_bot.message_handler(func=commands_handler(['/notify_all']))
 @bot_admin_command
 @command_with_delay(delay=1)
@@ -236,6 +255,8 @@ def command_day(message):
     split = message.text.split(' ', 1)
     if len(split) > 1:
         subs_notify(my_data.list_users(), '{}\n\n{}'.format(bold('Оповещение пользователей бота'), split[1]))
+    else:
+        my_bot.reply_to(message, 'Использование: /notify_all <ваше сообщение>')
 
 
 @my_bot.message_handler(func=commands_handler(['/log']))
