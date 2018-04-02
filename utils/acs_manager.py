@@ -36,9 +36,10 @@ class AcsManager:
         time_split = [int(x) for x in time_in.split(":")]
         remain_secs = (timedelta(hours=work_time_need) - timedelta(hours=time_split[0], minutes=time_split[1],
                                                                    seconds=time_split[2])).total_seconds()
-        remain_hours, remain_secs = divmod(remain_secs, 60 * 60)
+        below_zero = '-' if remain_secs < 0 else ''
+        remain_hours, remain_secs = divmod(abs(remain_secs), 60 * 60)
         remain_minutes, remain_secs = divmod(remain_secs, 60)
-        return "{:.0f}:{:02.0f}:{:02.0f}".format(remain_hours, remain_minutes, remain_secs)
+        return "{}{:.0f}:{:02.0f}:{:02.0f}".format(below_zero, remain_hours, remain_minutes, remain_secs)
 
     @staticmethod
     def reply_format(text, start_date, end_date, week_work_hours):
