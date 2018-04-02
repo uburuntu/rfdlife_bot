@@ -2,6 +2,7 @@
 from calendar import monthrange
 from datetime import datetime, timedelta
 
+import numpy
 import requests
 from telebot import types
 
@@ -28,12 +29,28 @@ class AcsManager:
         return time.strftime('%Y-%m-%d')
 
     @staticmethod
-    def reply_format(text, start_date, end_date):
+    def remain_time(start_date, end_date, week_work_hours, time_in):
+        # Some strange code for calc remain time
+        work_days = numpy.busday_count(start_date, end_date) if start_date != end_date else 1
+        work_time_need = week_work_hours / 5 * work_days
+        time_split = [int(x) for x in time_in.split(":")]
+        remain_secs = (timedelta(hours=work_time_need) - timedelta(hours=time_split[0], minutes=time_split[1],
+                                                                   seconds=time_split[2])).total_seconds()
+        remain_hours, remain_secs = divmod(remain_secs, 60 * 60)
+        remain_minutes, remain_secs = divmod(remain_secs, 60)
+        return "{:.0f}:{:02.0f}:{:02.0f}".format(remain_hours, remain_minutes, remain_secs)
+
+    @staticmethod
+    def reply_format(text, start_date, end_date, week_work_hours):
         if is_non_zero_file(config.FileLocation.acs_answer):
             with open(config.FileLocation.acs_answer, 'r', encoding='utf-8') as file:
                 split = text.split()
                 nice = file.read()
-                return nice.format(split[-5], split[-4], start_date, end_date, split[-2], split[-1])
+                return nice.format(last_name=split[-5], first_name=split[-4],
+                                   interval_beg=AcsManager.time_format(start_date),
+                                   interval_end=AcsManager.time_format(end_date),
+                                   time_in=split[-2], time_all=split[-1],
+                                   remain=AcsManager.remain_time(start_date, end_date, week_work_hours, split[-2]))
         return text
 
     @staticmethod
@@ -77,9 +94,9 @@ class AcsManager:
                    ('AcsTabelIntermediadateSearch[summary_table]', '1'))
 
         response = requests.get(self.acs_url, auth=(tokens.auth_login, tokens.auth_pswd), params=payload)
-        answer = self.reply_format(response.text,
-                                   self.time_format(start_date),
-                                   self.time_format(end_date)) if response.ok else self.asc_unaccessible_error
+        answer = self.reply_format(response.text, start_date, end_date,
+                                   my_data.get_user_settings(message.from_user.id)[
+                                       'week_work_hours']) if response.ok else self.asc_unaccessible_error
         my_bot.reply_to(message, answer, parse_mode="HTML")
 
     def in_office_now_text(self, user_id=0):
