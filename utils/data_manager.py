@@ -58,6 +58,21 @@ class DataManager:
                 return True
         return False
 
+    def check_password(self, message):
+        if tokens.access_pswd != "" and message.text == tokens.access_pswd:
+            if self.data.get(str(message.from_user.id)) is None:
+                self.data[str(message.from_user.id)] = {"authenticated": "True"}
+            else:
+                self.data[str(message.from_user.id)]["authenticated"] = "True"
+            user_action_log(message, "successfully registered")
+            my_bot.reply_to(message, "✅ Пароль верный!")
+            subs_notify(config.admin_ids, '✨ Новый пользователь: {}'.format(link_user(message.from_user)))
+            my_data.data[str(message.from_user.id)]['who'] = user_name(message.from_user)
+            self.register_user(message)
+        else:
+            user_action_log(message, "entered wrong password")
+            my_bot.reply_to(message, "⛔ Пароль не подошел!\n\nВызывай /start для новой попытки.")
+
     def register_user(self, message):
         if not self.is_registered(message):
             sent = my_bot.send_message(message.from_user.id,
@@ -71,22 +86,7 @@ class DataManager:
                                    'Например: 5059, 5060 и т.д.', parse_mode="HTML")
         my_bot.register_next_step_handler(sent, self.set_user_name)
 
-    def check_password(self, message):
-        if tokens.access_pswd != "" and message.text == tokens.access_pswd:
-            if self.data.get(str(message.from_user.id)) is None:
-                self.data[str(message.from_user.id)] = {"authenticated": "True"}
-            else:
-                self.data[str(message.from_user.id)]["authenticated"] = "True"
-            user_action_log(message, "successfully registered")
-            my_bot.reply_to(message, "✅ Пароль верный!")
-            subs_notify(config.admin_ids, '✨ Новый пользователь: {}'.format(link_user(message.from_user)))
-            self.register_user(message)
-        else:
-            user_action_log(message, "entered wrong password")
-            my_bot.reply_to(message, "⛔ Пароль не подошел!\n\nВызывай /start для новой попытки.")
-
     def set_user_name(self, message):
-        my_data.data[str(message.from_user.id)]['who'] = user_name(message.from_user)
         # Todo: check existing
         if message.text.isdigit():
             self.data[str(message.from_user.id)]['name'] = str(message.text)
