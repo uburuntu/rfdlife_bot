@@ -194,6 +194,43 @@ def dump_messages(all_messages):
     message_dump_lock.release()
 
 
+class TimeMemoize(object):
+    """Memoize with timeout"""
+    _caches = {}
+    _delays = {}
+
+    def __init__(self, delay=10):
+        self.delay = delay
+
+    def collect(self):
+        """Clear cache of results which have timed out"""
+        for func in self._caches:
+            cache = {}
+            for key in self._caches[func]:
+                if (datetime.now().timestamp() - self._caches[func][key][1]) < self._delays[func]:
+                    cache[key] = self._caches[func][key]
+            self._caches[func] = cache
+
+    def __call__(self, f):
+        self.cache = self._caches[f] = {}
+        self._delays[f] = self.delay
+
+        def func(*args, **kwargs):
+            kw = sorted(kwargs.items())
+            key = (args, tuple(kw))
+            time = datetime.now().timestamp()
+            try:
+                v = self.cache[key]
+                if (time - v[1]) > self.delay:
+                    raise KeyError
+            except KeyError:
+                v = self.cache[key] = f(*args, **kwargs), time
+            return v[0]
+
+        func.func_name = f.__name__
+        return func
+
+
 def cut_long_text(text, max_len=4000):
     """
     Функция для нарезки длинных сообщений по переносу строк или по точке в конце предложения или по пробелу

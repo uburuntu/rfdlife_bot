@@ -7,7 +7,7 @@ from telebot import types
 
 import config
 import tokens
-from utils.common_utils import is_non_zero_file, my_bot, bold
+from utils.common_utils import TimeMemoize, bold, is_non_zero_file, my_bot
 from utils.data_manager import my_data
 
 
@@ -140,6 +140,7 @@ class AcsManager:
         answer = self.state_format(response.text) if response.ok else self.asc_unaccessible_error
         my_bot.reply_to(message, answer, parse_mode="HTML")
 
+    @TimeMemoize(delay=5 * 60 + 5)
     def is_user_in_office(self, user_id):
         today = datetime.today()
 
