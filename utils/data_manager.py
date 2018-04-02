@@ -15,6 +15,8 @@ class DataManager:
         self.data = dict()
         self.load()
 
+        self.asc_link = '<a href=\"https://corp.rfdyn.ru/index.php/acs-tabel-intermediadate/\">СКД</a>'
+
     def load(self):
         if is_non_zero_file(self.file_name):
             global_lock.acquire()
@@ -81,9 +83,8 @@ class DataManager:
             return
 
         sent = my_bot.send_message(message.from_user.id,
-                                   '❓ Твой номер в '
-                                   '<a href=\"https://corp.rfdyn.ru/index.php/acs-tabel-intermediadate/\">СКД</a>?\n'
-                                   'Например: 5059, 5060 и т.д.', parse_mode="HTML")
+                                   '❓ Твой номер в {}?\nНапример: 5059, 5060 и т.д.'.format(self.asc_link),
+                                   parse_mode="HTML")
         my_bot.register_next_step_handler(sent, self.set_user_name)
 
     def set_user_name(self, message):
@@ -126,9 +127,10 @@ class DataManager:
             else:
                 self.data[str(message.from_user.id)]['alert_users'] = [split[1]]
             self.save()
-            my_bot.reply_to(message, '⚙️ Оповещения о {} включены!'.format(split[1]))
+            my_bot.reply_to(message, '📣️ Оповещения о {} включены!'.format(split[1]))
         else:
-            my_bot.reply_to(message, 'Использование: /alert_add <ФИО из /in_office>')
+            my_bot.reply_to(message, 'Использование: /alert_add [ФИО в соответствии записи в {}]\n'
+                                     'Ваш список оповещений: /alert'.format(self.asc_link), parse_mode="HTML")
 
     def erase_alert_name(self, message):
         split = message.text.split(' ', 1)
@@ -137,19 +139,22 @@ class DataManager:
                 if self.data[str(message.from_user.id)]['alert_users'].count(split[1]) != 0:
                     self.data[str(message.from_user.id)]['alert_users'].remove(split[1])
                     self.save()
-                    my_bot.reply_to(message, '⚙️ Оповещения о {} выключены!'.format(split[1]))
+                    my_bot.reply_to(message, '📣️ Оповещения о {} выключены!'.format(split[1]))
                     return
-        my_bot.reply_to(message, 'Использование: /alert_erase <ФИО из /in_office>')
+        my_bot.reply_to(message, 'Использование: /alert_erase [ФИО в соответствии записи в {}]\n'
+                                 'Ваш список оповещений: /alert'.format(self.asc_link), parse_mode="HTML")
 
     def list_alert_name(self, message):
         users = self.data[str(message.from_user.id)].get('alert_users')
         if users is not None and len(users) > 0:
-            my_bot.reply_to(message, '⚙️ Ваш список оповещений:\n— <code>{}</code>\n\n'
-                                     'Используйте /alert_add и /alert_erase для управления списком.'
+            my_bot.reply_to(message, '📣️ Ваш список оповещений:\n— <code>{}</code>\n\n'
+                                     'Используйте /alert_add и /alert_erase для управления списком, '
+                                     'и /settings для настройки оповещений.'
                                      ''.format('</code>\n— <code>'.join(users)), parse_mode='HTML')
         else:
-            my_bot.reply_to(message, '⚙️ Ваш список оповещений пуст.\n\n'
-                                     'Используйте /alert_add и /alert_erase для управления списком.')
+            my_bot.reply_to(message, '📣️ Ваш список оповещений пуст.\n\n'
+                                     'Используйте /alert_add и /alert_erase для управления списком, '
+                                     'и /settings для настройки оповещений.')
 
 
 class DataJsonEncoder(json.JSONEncoder):
