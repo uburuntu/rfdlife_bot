@@ -4,7 +4,7 @@ import re
 from collections import Counter
 
 import config
-from utils.common_utils import bold, my_bot
+from utils.common_utils import bold, link, my_bot
 from utils.data_manager import my_data
 
 
@@ -48,3 +48,19 @@ def stats(message):
                                     commands_most[2][0], bold(commands_most[2][1]))
 
     my_bot.reply_to(message, text, parse_mode='HTML')
+
+
+def users(message):
+    with open(config.FileLocation.bot_logs, 'r', encoding='utf-8') as file:
+        file_text = file.read()
+        users = re.findall('(?:User )(\d+)(?:.*called)', file_text)
+
+    user_counter = Counter(users)
+
+    text = 'Список пользователей бота:\n\n'
+    count = 1
+    for user_id, user in my_data.data.items():
+        user_commands_count = user_counter[user_id]
+        text += '{}. {} — {}\n'.format(count, link(user['who'], user_id), user_commands_count)
+        count += 1
+    my_bot.reply_to(message, "{}".format(text), parse_mode="HTML")

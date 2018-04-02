@@ -10,9 +10,9 @@ import config
 import tokens
 from utils import admin_tools, birthday, chai, donate, playroom, stats
 from utils.acs_manager import my_acs
-from utils.common_utils import action_log, bold, bot_admin_command, botan, chai_user_command, command_with_delay, \
-    commands_handler, cut_long_text, dump_messages, global_lock, is_command, link_user, message_dump_lock, my_bot, \
-    my_bot_name, scheduler, subs_notify, user_action_log, check_outdated_callback, link
+from utils.common_utils import action_log, bold, bot_admin_command, botan, chai_user_command, check_outdated_callback, \
+    command_with_delay, commands_handler, cut_long_text, dump_messages, global_lock, is_command, link_user, \
+    message_dump_lock, my_bot, my_bot_name, scheduler, subs_notify, user_action_log
 from utils.data_manager import my_data
 
 
@@ -207,7 +207,7 @@ def callback_in_office(call):
 
 
 @my_bot.callback_query_handler(func=lambda call: call.data.startswith('settings'))
-@check_outdated_callback(delay=24 * 60 * 60, cmd='/settings')
+@check_outdated_callback(delay=15 * 60, cmd='/settings')
 def callback_settings(call):
     user_action_log(call, "callbacked " + call.data)
     my_data.get_user_settings(call.from_user.id).settings_update(call)
@@ -254,14 +254,9 @@ def command_dump(message):
 
 @my_bot.message_handler(func=commands_handler(['/users']))
 @bot_admin_command
-def command_dump(message):
+def command_users(message):
     user_action_log(message, "called " + message.text)
-    text = 'Список пользователей бота:\n\n'
-    count = 1
-    for user_id, user in my_data.data.items():
-        text += '{}. {}\n'.format(count, link(user['who'], user_id))
-        count += 1
-    my_bot.reply_to(message, "{}".format(text), parse_mode="HTML")
+    stats.users(message)
 
 
 @my_bot.message_handler(func=is_command())
