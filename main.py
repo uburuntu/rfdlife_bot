@@ -8,10 +8,11 @@ import requests
 
 import config
 import tokens
-from utils import admin_tools, birthday, chai, donate, playroom, stats
+from utils import birthday, chai, donate, playroom, stats
 from utils.acs_manager import my_acs
+from utils.admin_tools import kill_bot, update_bot
 from utils.common_utils import action_log, bold, bot_admin_command, botan, chai_user_command, check_outdated_callback, \
-    command_with_delay, commands_handler, cut_long_text, dump_messages, global_lock, is_command, link_user, \
+    command_with_delay, commands_handler, cut_long_text, dump_messages, global_lock, is_command, link, \
     message_dump_lock, my_bot, my_bot_name, scheduler, subs_notify, user_action_log
 from utils.data_manager import my_data
 
@@ -223,7 +224,9 @@ def command_day(message):
     user_action_log(message, "called " + message.text)
     split = message.text.split(' ', 1)
     if len(split) > 1:
-        subs_notify(config.admin_ids, 'Обратная связь от {}: {}'.format(link_user(message.from_user), split[1]))
+        subs_notify(config.admin_ids, 'Обратная связь от {}: {}'
+                                      ''.format(link(my_data.data[str(message.from_user.id)]['who'],
+                                                     message.from_user.id), split[1]))
     else:
         my_bot.reply_to(message, 'Использование: /feedback <ваше обращение>')
 
@@ -240,7 +243,7 @@ def command_reply(message):
             if hasattr(replying_msg, "entities"):
                 user_ids = [x.user.id for x in replying_msg.entities if x.type == 'text_mention']
                 if len(user_ids) == 1:
-                    my_bot.send_message(user_ids[0], '{}: {}'.format(bold('Ответ от разработчика'), split[1]),
+                    my_bot.send_message(user_ids[0], '{}: {}'.format(bold('Разработчик'), split[1]),
                                         parse_mode='HTML')
                     my_bot.reply_to(message, 'Сообщение отправлено!')
                     return
@@ -296,9 +299,9 @@ def admin_tools(message):
         return
     command = parts[0].lower()
     if command == "/update":
-        admin_tools.update_bot(message)
+        update_bot(message)
     elif command == "/kill":
-        admin_tools.kill_bot(message)
+        kill_bot(message)
 
 
 # All messages handler
