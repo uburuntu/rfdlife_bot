@@ -36,7 +36,7 @@ def birthdays_get():
 
 
 def birthday_check():
-    action_log('Launched birthday check')
+    action_log('Scheduled job: launched birthday check')
 
     drs = birthdays_get()
 

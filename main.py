@@ -318,6 +318,7 @@ while __name__ == '__main__':
 
         scheduler.add_job(my_acs.in_office_alert, 'interval', id='in_office_alert', replace_existing=True, seconds=60)
         scheduler.add_job(birthday.birthday_check, 'cron', id='birthday_check', replace_existing=True, hour=11)
+        scheduler.add_job(my_data.dump_file, 'cron', id='dump_file', replace_existing=True, minute=0)
 
         # my_bot.skip_pending = True
 

@@ -163,6 +163,12 @@ def value_to_file(file_name, value):
     global_lock.release()
 
 
+def send_file(chat_id, file_name, **kwargs):
+    if is_non_zero_file(file_name):
+        with open(file_name, 'r', encoding='utf-8') as file:
+            return my_bot.send_document(chat_id, file, **kwargs)
+
+
 def dump_messages(all_messages):
     groups = {}
     for message in all_messages:

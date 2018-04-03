@@ -4,8 +4,8 @@ import json
 
 import config
 import tokens
-from utils.common_utils import bold, cut_long_text, global_lock, is_non_zero_file, link_user, my_bot, subs_notify, \
-    user_action_log, user_name
+from utils.common_utils import action_log, bold, chat_info, curr_time, global_lock, is_non_zero_file, link_user, my_bot, \
+    send_file, subs_notify, user_action_log, user_name, my_bot_name
 from utils.settings import UserSettings
 
 
@@ -30,13 +30,16 @@ class DataManager:
             json.dump(self.data, file, cls=DataJsonEncoder, indent=True, ensure_ascii=False)
         global_lock.release()
 
-    def dump_file(self, message):
-        if is_non_zero_file(self.file_name):
-            global_lock.acquire()
-            with open(self.file_name, 'r', encoding='utf-8') as file:
-                for text in cut_long_text(file.read()):
-                    my_bot.reply_to(message, text)
-            global_lock.release()
+    def dump_file(self, message=None):
+        if tokens.dumping_channel_id != '':
+            msg_1 = send_file(tokens.dumping_channel_id, self.file_name,
+                              caption='{}: dump user db | {}'.format(my_bot_name, curr_time()))
+            msg_2 = send_file(tokens.dumping_channel_id, config.FileLocation.bot_logs,
+                              caption='{}: dump logs | {}'.format(my_bot_name, curr_time()))
+            if message is None:
+                action_log('Scheduled job: data dumped to ' + chat_info(msg_2.chat))
+            else:
+                my_bot.forward_message(message.chat.id, msg_1.chat.id, msg_1.message_id)
 
     def command_need_name(self, func):
         def wrapped(message):
