@@ -66,39 +66,44 @@ class AcsManager:
                 return '🌴 Не в офисе сегодня 🌴'
         return text
 
-    def year_time(self, message):
-        today = datetime.today()
-        year_start = today.replace(day=1, month=1)
-        year_end = today.replace(day=31, month=12)
-        self._make_time_request(message, year_start, year_end)
+    @staticmethod
+    def year_time(day):
+        return day.replace(day=1, month=1), day.replace(day=31, month=12)
 
-    def month_time(self, message):
-        today = datetime.today()
-        month_start = today.replace(day=1)
-        month_end = today.replace(day=monthrange(today.year, today.month)[1])
-        self._make_time_request(message, month_start, month_end)
+    @staticmethod
+    def month_time(day):
+        return day.replace(day=1), day.replace(day=monthrange(day.year, day.month)[1])
 
-    def week_time(self, message):
-        today = datetime.today()
-        week_start = today - timedelta(days=today.weekday())
+    @staticmethod
+    def week_time(day):
+        week_start = day - timedelta(days=day.weekday())
         week_end = week_start + timedelta(days=6)
-        self._make_time_request(message, week_start, week_end)
+        return week_start, week_end
 
-    def day_time(self, message):
-        today = datetime.today()
-        self._make_time_request(message, today, today)
+    def reply_time(self, message):
+        split = message.text.split('@ ')
+        cmd = split[0]
+        day = datetime.today()
+        if cmd == '/year':
+            beg, end = self.year_time(day)
+        elif cmd == '/month':
+            beg, end = self.month_time(day)
+        elif cmd == '/week':
+            beg, end = self.week_time(day)
+        else:
+            beg, end = day, day
+        my_bot.reply_to(message, self._make_time_request(message.from_user.id, beg, end), parse_mode="HTML")
 
-    def _make_time_request(self, message, start_date, end_date):
-        payload = (('AcsTabelIntermediadateSearch[staff_id]', my_data.get_user_name(message.from_user.id)),
+    def _make_time_request(self, user_id, start_date, end_date):
+        payload = (('AcsTabelIntermediadateSearch[staff_id]', my_data.get_user_name(user_id)),
                    ('AcsTabelIntermediadateSearch[date_pass_first]', self.time_format(start_date)),
                    ('AcsTabelIntermediadateSearch[date_pass_last]', self.time_format(end_date)),
                    ('AcsTabelIntermediadateSearch[summary_table]', '1'))
 
         response = requests.get(self.acs_url, auth=(tokens.auth_login, tokens.auth_pswd), params=payload)
-        answer = self.reply_format(response.text, start_date, end_date,
-                                   my_data.get_user_settings(message.from_user.id)[
-                                       'week_work_hours']) if response.ok else self.asc_unaccessible_error
-        my_bot.reply_to(message, answer, parse_mode="HTML")
+        return self.reply_format(response.text, start_date, end_date,
+                                 my_data.get_user_settings(user_id)[
+                                     'week_work_hours']) if response.ok else self.asc_unaccessible_error
 
     def in_office_now_text(self, user_id=0):
         in_office_txt = self._make_in_office_request()

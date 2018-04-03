@@ -52,36 +52,12 @@ def command_restart(message):
     my_data.register_user(message)
 
 
-@my_bot.message_handler(func=commands_handler(['/year']))
+@my_bot.message_handler(func=commands_handler(['/year', '/month', '/week', '/day']))
 @my_data.command_need_name
 @command_with_delay(delay=1)
 def command_year(message):
     user_action_log(message, "called " + message.text)
-    my_acs.year_time(message)
-
-
-@my_bot.message_handler(func=commands_handler(['/month']))
-@my_data.command_need_name
-@command_with_delay(delay=1)
-def command_month(message):
-    user_action_log(message, "called " + message.text)
-    my_acs.month_time(message)
-
-
-@my_bot.message_handler(func=commands_handler(['/week']))
-@my_data.command_need_name
-@command_with_delay(delay=1)
-def command_week(message):
-    user_action_log(message, "called " + message.text)
-    my_acs.week_time(message)
-
-
-@my_bot.message_handler(func=commands_handler(['/day']))
-@my_data.command_need_name
-@command_with_delay(delay=1)
-def command_day(message):
-    user_action_log(message, "called " + message.text)
-    my_acs.day_time(message)
+    my_acs.reply_time(message)
 
 
 @my_bot.message_handler(func=commands_handler(['/state']))
