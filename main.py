@@ -210,7 +210,7 @@ def command_day(message):
                                       ''.format(link(my_data.data[str(message.from_user.id)]['who'],
                                                      message.from_user.id), split[1]))
     else:
-        my_bot.reply_to(message, 'Использование: /feedback <ваше обращение>')
+        my_bot.reply_to(message, 'Использование: /feedback [ваше обращение]')
 
 
 @my_bot.message_handler(func=commands_handler(['/reply']))
@@ -229,7 +229,7 @@ def command_reply(message):
                                         parse_mode='HTML')
                     my_bot.reply_to(message, 'Сообщение отправлено!')
                     return
-    my_bot.reply_to(message, 'Использовать с ответом на фидбек: /reply <ваш ответ>')
+    my_bot.reply_to(message, 'Использовать с ответом на фидбек: /reply [ваш ответ]')
 
 
 @my_bot.message_handler(func=commands_handler(['/notify_all']))
@@ -241,7 +241,7 @@ def command_day(message):
     if len(split) > 1:
         subs_notify(my_data.list_users(), '{}\n\n{}'.format(bold('Оповещение пользователей бота'), split[1]))
     else:
-        my_bot.reply_to(message, 'Использование: /notify_all <ваше сообщение>')
+        my_bot.reply_to(message, 'Использование: /notify_all [ваше сообщение]')
 
 
 @my_bot.message_handler(func=commands_handler(['/log']))

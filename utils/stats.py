@@ -3,6 +3,8 @@
 import re
 from collections import Counter
 
+from datetime import datetime
+
 import config
 from utils.common_utils import bold, link, my_bot
 from utils.data_manager import my_data
@@ -29,11 +31,12 @@ def stats(message):
     commands_counter = Counter(commands)
     commands_most = commands_counter.most_common(3)
 
-    text = 'Пользователей бота: {}\n' \
-           'Команд вызвано: {}\n' \
-           'Суммарно отслеживаемых сотрудников: {}\n\n'.format(bold(users_count),
-                                                               bold(all_commands_count),
-                                                               bold(alerts_count))
+    days_from_birthday = (datetime.today() - datetime(year=2018, month=2, day=9)).days
+
+    text = f'Бот родился 9 февраля 2018 и сегодня его {bold(days_from_birthday)} день!\n' \
+           f'Пользователей бота: {bold(users_count)}\n' \
+           f'Команд вызвано: {bold(all_commands_count)}\n' \
+           f'Суммарно отслеживаемых сотрудников: {bold(alerts_count)}\n\n'
 
     text += 'Вы использовали {} команд и находитесь на {} месте, вызвав {}% команд\n\n' \
             ''.format(bold(user_commands_count),
