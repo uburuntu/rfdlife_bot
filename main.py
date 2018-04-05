@@ -180,6 +180,12 @@ def callback_chai(call):
     chai.chai_callback(call)
 
 
+@my_bot.callback_query_handler(func=lambda call: call.data.startswith('time'))
+def callback_in_office(call):
+    user_action_log(call, "callbacked " + call.data)
+    my_acs.reply_time_update(call)
+
+
 @my_bot.callback_query_handler(func=lambda call: call.data.startswith('in_office'))
 def callback_in_office(call):
     user_action_log(call, "callbacked " + call.data)
@@ -282,6 +288,7 @@ def admin_tools(message):
 
 # All messages handler
 def handle_messages(messages):
+    return
     if tokens.botan_token != '':
         for message in messages:
             botan.track(message)

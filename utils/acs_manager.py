@@ -3,6 +3,7 @@ from calendar import monthrange
 from datetime import datetime, timedelta
 
 import numpy
+import re
 import requests
 from telebot import types
 
@@ -31,7 +32,7 @@ class AcsManager:
     @staticmethod
     def remain_time(start_date, end_date, week_work_hours, time_in):
         # Some strange code for calc remain time
-        work_days = numpy.busday_count(start_date, end_date) if start_date != end_date else 1
+        work_days = numpy.busday_count(start_date, end_date) if start_date != end_date else int(start_date.weekday() < 5)
         work_time_need = week_work_hours / 5 * work_days
         time_split = [int(x) for x in time_in.split(":")]
         remain_secs = (timedelta(hours=work_time_need) - timedelta(hours=time_split[0], minutes=time_split[1],
@@ -80,19 +81,46 @@ class AcsManager:
         week_end = week_start + timedelta(days=6)
         return week_start, week_end
 
-    def reply_time(self, message):
-        split = message.text.split('@ ')
-        cmd = split[0]
-        day = datetime.today()
-        if cmd == '/year':
+    def reply_time_data(self, user_id, cmd, day):
+        if cmd == 'year':
             beg, end = self.year_time(day)
-        elif cmd == '/month':
+        elif cmd == 'month':
             beg, end = self.month_time(day)
-        elif cmd == '/week':
+        elif cmd == 'week':
             beg, end = self.week_time(day)
         else:
             beg, end = day, day
-        my_bot.reply_to(message, self._make_time_request(message.from_user.id, beg, end), parse_mode="HTML")
+
+        if abs(datetime.today().year - day.year) > 4:
+            return "Иногда нужно остановиться и насладиться текущим моментом 🦄", None
+
+        prev, next = beg - timedelta(days=1), end + timedelta(days=1)
+        keyboard = types.InlineKeyboardMarkup()
+        keyboard.add(
+                types.InlineKeyboardButton(text="⬅️", callback_data="time_{}_{}".format(cmd, prev.strftime('%d/%m/%Y'))),
+                types.InlineKeyboardButton(text="🔄", callback_data="time_{}_{}".format(cmd, day.strftime('%d/%m/%Y'))),
+                types.InlineKeyboardButton(text="➡️", callback_data="time_{}_{}".format(cmd, next.strftime('%d/%m/%Y'))))
+        return self._make_time_request(user_id, beg, end), keyboard
+
+    def reply_time_update(self, call):
+        split = call.data.split('_')
+        cmd = split[1]
+        day = datetime.strptime(split[2], '%d/%m/%Y')
+        text, keyboard = self.reply_time_data(call.from_user.id, cmd, day)
+        my_bot.answer_callback_query(callback_query_id=call.id, show_alert=False, text="✅  Сообщение обновлено")
+        my_bot.edit_message_text(text,
+                                 chat_id=call.message.chat.id, message_id=call.message.message_id,
+                                 reply_markup=keyboard, parse_mode="HTML")
+
+    def reply_time(self, message):
+        split = re.findall('/(\w*)(?:@\w*)?\s*([\d/]*)', message.text)[0]
+        cmd = split[0]
+        try:
+            day = datetime.today() if split[1] == '' else datetime.strptime(split[1], '%d/%m/%y')
+        except ValueError:
+            day = datetime.today()
+        text, keyboard = self.reply_time_data(message.from_user.id, cmd, day)
+        my_bot.reply_to(message, text, reply_markup=keyboard, parse_mode="HTML")
 
     def _make_time_request(self, user_id, start_date, end_date):
         payload = (('AcsTabelIntermediadateSearch[staff_id]', my_data.get_user_name(user_id)),
@@ -176,7 +204,7 @@ class AcsManager:
             split = response.text.split()
             if len(split) > 17:
                 return split[18] == 'Вход'
-        return True
+        return False
 
 
 my_acs = AcsManager()
