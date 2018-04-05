@@ -9,6 +9,7 @@ from os import path
 
 import telebot
 from apscheduler.schedulers.background import BackgroundScheduler
+from telebot.apihelper import ApiException
 
 import config
 import tokens
@@ -308,5 +309,6 @@ def subs_notify(subs, text, keyboard=None, me=None):
         try:
             if chat_id != me:
                 my_bot.send_message(chat_id, text, parse_mode="HTML", reply_markup=keyboard)
-        except:
+        except ApiException as e:
+            action_log(f"Exception in subs_notify: {e},\nchat_id={chat_id}, text=({text})")
             pass

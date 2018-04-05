@@ -209,6 +209,7 @@ def command_day(message):
         subs_notify(config.admin_ids, 'Обратная связь от {}: {}'
                                       ''.format(link(my_data.data[str(message.from_user.id)]['who'],
                                                      message.from_user.id), split[1]))
+        my_bot.reply_to(message, 'Сообщение отправлено!')
     else:
         my_bot.reply_to(message, 'Использование: /feedback [ваше обращение]')
 
