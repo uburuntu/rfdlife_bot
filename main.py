@@ -5,6 +5,7 @@ import os
 import time
 
 import requests
+from telebot.apihelper import ApiException
 
 import config
 import tokens
@@ -156,6 +157,7 @@ def command_alert(message):
 
 
 @my_bot.message_handler(func=commands_handler(['/settings']))
+@my_data.command_need_name
 @command_with_delay(delay=1)
 def command_settings(message):
     user_action_log(message, "called " + message.text)
@@ -243,6 +245,18 @@ def command_day(message):
         subs_notify(my_data.list_users(), '{}\n\n{}'.format(bold('Оповещение пользователей бота'), split[1]))
     else:
         my_bot.reply_to(message, 'Использование: /notify_all [ваше сообщение]')
+
+
+@my_bot.message_handler(func=commands_handler(['/touch_all']))
+@bot_admin_command
+@command_with_delay(delay=1)
+def command_day(message):
+    user_action_log(message, "called " + message.text)
+    for chat_id in my_data.list_users():
+        try:
+            my_bot.send_chat_action(chat_id, action="typing")
+        except ApiException as e:
+            action_log(f"Telegram api exception: {e},\nchat_id={chat_id}")
 
 
 @my_bot.message_handler(func=commands_handler(['/log']))

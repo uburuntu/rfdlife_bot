@@ -2,7 +2,6 @@
 # _*_ coding: utf-8 _*_
 import re
 from collections import Counter
-
 from datetime import datetime
 
 import config

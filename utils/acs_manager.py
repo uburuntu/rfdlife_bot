@@ -1,9 +1,9 @@
 # _*_ coding: utf-8 _*_
+import re
 from calendar import monthrange
 from datetime import datetime, timedelta
 
 import numpy
-import re
 import requests
 from telebot import types
 
@@ -32,7 +32,8 @@ class AcsManager:
     @staticmethod
     def remain_time(start_date, end_date, week_work_hours, time_in):
         # Some strange code for calc remain time
-        work_days = numpy.busday_count(start_date, end_date) if start_date != end_date else int(start_date.weekday() < 5)
+        work_days = numpy.busday_count(start_date, end_date) if start_date != end_date else int(
+            start_date.weekday() < 5)
         work_time_need = week_work_hours / 5 * work_days
         time_split = [int(x) for x in time_in.split(":")]
         remain_secs = (timedelta(hours=work_time_need) - timedelta(hours=time_split[0], minutes=time_split[1],
@@ -97,9 +98,11 @@ class AcsManager:
         prev, next = beg - timedelta(days=1), end + timedelta(days=1)
         keyboard = types.InlineKeyboardMarkup()
         keyboard.add(
-                types.InlineKeyboardButton(text="⬅️", callback_data="time_{}_{}".format(cmd, prev.strftime('%d/%m/%Y'))),
+                types.InlineKeyboardButton(text="⬅️",
+                                           callback_data="time_{}_{}".format(cmd, prev.strftime('%d/%m/%Y'))),
                 types.InlineKeyboardButton(text="🔄", callback_data="time_{}_{}".format(cmd, day.strftime('%d/%m/%Y'))),
-                types.InlineKeyboardButton(text="➡️", callback_data="time_{}_{}".format(cmd, next.strftime('%d/%m/%Y'))))
+                types.InlineKeyboardButton(text="➡️",
+                                           callback_data="time_{}_{}".format(cmd, next.strftime('%d/%m/%Y'))))
         return self._make_time_request(user_id, beg, end), keyboard
 
     def reply_time_update(self, call):

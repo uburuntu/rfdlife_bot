@@ -7,16 +7,15 @@ import threading
 from datetime import datetime
 from os import path
 
-import telebot
 from apscheduler.schedulers.background import BackgroundScheduler
-from telebot.apihelper import ApiException
 
 import config
 import tokens
 from utils.botan import Botan
+from utils.telebot_wrapper import TelebotWrapper
 
 # Инициализация бота
-my_bot = telebot.TeleBot(tokens.bot, threaded=False)
+my_bot = TelebotWrapper(tokens.bot, threaded=False)
 my_bot_name = '@' + my_bot.get_me().username
 
 botan = Botan(tokens.botan_token)
@@ -38,10 +37,6 @@ def commands_handler(cmnds):
         return (s in cmnds) or (s.endswith(my_bot_name) and s.split('@')[0] in cmnds)
 
     return wrapped
-
-
-def curr_time():
-    return datetime.now().strftime('%d/%m/%Y %H:%M:%S')
 
 
 def user_name(user):
@@ -67,6 +62,10 @@ def chat_info(chat):
         return 'private'
     else:
         return chat.type + ': ' + chat.title + ' (' + str(chat.id) + ')'
+
+
+def curr_time():
+    return datetime.now().strftime('%d/%m/%Y %H:%M:%S')
 
 
 def action_log(text):
@@ -306,9 +305,5 @@ def link_user(user, mode="html"):
 
 def subs_notify(subs, text, keyboard=None, me=None):
     for chat_id in subs:
-        try:
-            if chat_id != me:
-                my_bot.send_message(chat_id, text, parse_mode="HTML", reply_markup=keyboard)
-        except ApiException as e:
-            action_log(f"Exception in subs_notify: {e},\nchat_id={chat_id}, text=({text})")
-            pass
+        if chat_id != me:
+            my_bot.send_message(chat_id, text, parse_mode="HTML", reply_markup=keyboard)
