@@ -5,7 +5,6 @@ import os
 import time
 
 import requests
-from telebot.apihelper import ApiException
 
 import config
 import tokens
@@ -321,12 +320,15 @@ while __name__ == '__main__':
         scheduler.add_job(birthday.birthday_check, 'cron', id='birthday_check', replace_existing=True, hour=11)
         scheduler.add_job(my_data.dump_file, 'cron', id='dump_file', replace_existing=True, minute=0)
 
-        # my_bot.skip_pending = True
+        my_bot.skip_pending = False
 
         # Запуск Long Poll бота
         my_bot.set_update_listener(handle_messages)
-        my_bot.polling(none_stop=True, interval=1, timeout=60)
-        time.sleep(1)
+        while True:
+            try:
+                my_bot.polling(none_stop=True, interval=1, timeout=60)
+            except requests.exceptions.ConnectionError as e:
+                time.sleep(1)
 
     # из-за Telegram API иногда какой-нибудь пакет не доходит
     except requests.exceptions.ReadTimeout as e:
@@ -334,9 +336,9 @@ while __name__ == '__main__':
         time.sleep(5)
 
     # если пропало соединение, то пытаемся снова
-    except requests.exceptions.ConnectionError as e:
-        action_log("Connection Error. We are offline. Reconnecting...")
-        time.sleep(5)
+    # except requests.exceptions.ConnectionError as e:
+    #     action_log("Connection Error. We are offline. Reconnecting...")
+    #     time.sleep(5)
 
     # если Python сдурит и пойдёт в бесконечную рекурсию (не особо спасает)
     except RecursionError as e:

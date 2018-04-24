@@ -8,6 +8,7 @@ from datetime import datetime
 from os import path
 
 from apscheduler.schedulers.background import BackgroundScheduler
+from telebot import apihelper
 
 import config
 import tokens
@@ -15,6 +16,11 @@ from utils.botan import Botan
 from utils.telebot_wrapper import TelebotWrapper
 
 # Инициализация бота
+apihelper.CONNECT_TIMEOUT = 60
+apihelper.proxy = {
+    'http': 'socks5://telegram:telegram@sasat.tgproxy.me:1080',
+    'https': 'socks5://telegram:telegram@sasat.tgproxy.me:1080'
+}
 my_bot = TelebotWrapper(tokens.bot, threaded=False)
 my_bot_name = '@' + my_bot.get_me().username
 
