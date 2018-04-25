@@ -16,7 +16,7 @@ class TelebotWrapper(telebot.TeleBot):
     def send_message(self, chat_id, text, disable_web_page_preview=None, reply_to_message_id=None, reply_markup=None,
                      parse_mode=None, disable_notification=None):
         try:
-            super().send_message(chat_id, text, disable_web_page_preview, reply_to_message_id, reply_markup,
-                                 parse_mode, disable_notification)
+            return super().send_message(chat_id, text, disable_web_page_preview, reply_to_message_id, reply_markup,
+                                        parse_mode, disable_notification)
         except ApiException as e:
             self.log(f"{e},\nchat_id={chat_id}, text=({text})")
