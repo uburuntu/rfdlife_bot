@@ -5,6 +5,7 @@ import os
 import time
 
 import requests
+from telebot.apihelper import ApiException
 
 import config
 import tokens
@@ -302,11 +303,11 @@ def admin_tools(message):
 
 # All messages handler
 def handle_messages(messages):
-    return
-    if tokens.botan_token != '':
-        for message in messages:
-            botan.track(message)
-    dump_messages(messages)
+    if None:
+        if tokens.botan_token != '':
+            for message in messages:
+                botan.track(message)
+        dump_messages(messages)
 
 
 while __name__ == '__main__':

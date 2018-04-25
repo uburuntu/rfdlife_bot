@@ -33,7 +33,7 @@ class AcsManager:
     def remain_time(start_date, end_date, week_work_hours, time_in):
         # Some strange code for calc remain time
         work_days = numpy.busday_count(start_date, end_date) if start_date != end_date else int(
-            start_date.weekday() < 5)
+                start_date.weekday() < 5)
         work_time_need = week_work_hours / 5 * work_days
         time_split = [int(x) for x in time_in.split(":")]
         remain_secs = (timedelta(hours=work_time_need) - timedelta(hours=time_split[0], minutes=time_split[1],
