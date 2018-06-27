@@ -12,6 +12,8 @@ class FileLocation:
     acs_answer = text_dir + 'acs_answer.html'
     acs_state_answer = text_dir + 'acs_state_answer.html'
 
+    camera_error = data_dir + 'camera_error.jpg'
+
     gen_dir = 'gen/'
     dump_dir = gen_dir + 'dump/'
 
