@@ -12,7 +12,8 @@ def chai(message):
     keyboard.row(types.InlineKeyboardButton(text="Го!", callback_data="chai_go"),
                  types.InlineKeyboardButton(text="Через 5 мин", callback_data="chai_5min"))
     keyboard.add(types.InlineKeyboardButton(text="Нет, позже", callback_data="chai_no"))
-    subs_notify(config.chai_subscribers, user_name(message.from_user) + " зовет чай! ☕️", keyboard)
+    custom_msg = (message.text.split(" ", 1)[1:] + ["зовет чай! ☕️"])[0]
+    subs_notify(config.chai_subscribers, "{} {}".format(user_name(message.from_user), custom_msg), keyboard)
 
 
 def chai_message(message):
