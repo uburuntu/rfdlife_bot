@@ -5,6 +5,8 @@ import os
 import time
 
 import requests
+from apscheduler.schedulers.background import BackgroundScheduler
+from telebot import apihelper
 from telebot.apihelper import ApiException
 
 import config
@@ -12,9 +14,10 @@ import tokens
 from utils import birthday, chai, donate, playroom, stats
 from utils.acs_manager import my_acs
 from utils.admin_tools import kill_bot, update_bot
-from utils.common_utils import action_log, bold, bot_admin_command, botan, chai_user_command, check_outdated_callback, \
+from utils.botan import Botan
+from utils.common_utils import action_log, bold, bot_admin_command, chai_user_command, check_outdated_callback, \
     command_with_delay, commands_handler, cut_long_text, dump_messages, global_lock, is_command, link, \
-    message_dump_lock, my_bot, my_bot_name, scheduler, subs_notify, user_action_log
+    message_dump_lock, my_bot, subs_notify, user_action_log
 from utils.data_manager import my_data
 
 
@@ -300,7 +303,7 @@ def command_commands(message):
 @bot_admin_command
 def admin_tools(message):
     parts = message.text.split()
-    if len(parts) < 2 or parts[1] != my_bot_name:
+    if len(parts) < 2 or parts[1] != my_bot.name:
         return
     command = parts[0].lower()
     if command == "/update":
@@ -318,55 +321,49 @@ def handle_messages(messages):
         dump_messages(messages)
 
 
-while __name__ == '__main__':
-    try:
-        if os.path.isfile(config.FileLocation.bot_killed):
-            os.remove(config.FileLocation.bot_killed)
+if __name__ == '__main__':
+    # Настройка глобальных переменных
+    apihelper.proxy = {
+        'http' : 'socks5://telegram:telegram@rmpufgh1.teletype.live:1080',
+        'https': 'socks5://telegram:telegram@rmpufgh1.teletype.live:1080'
+    }
 
-        action_log("Running bot!")
+    botan = Botan(tokens.botan_token)
 
-        scheduler.add_job(my_acs.in_office_alert, 'interval', id='in_office_alert', replace_existing=True, seconds=60)
-        scheduler.add_job(birthday.birthday_check, 'cron', id='birthday_check', replace_existing=True, hour=11)
-        scheduler.add_job(my_data.dump_file, 'cron', id='dump_file', replace_existing=True, minute=0)
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(my_acs.in_office_alert, 'interval', id='in_office_alert', replace_existing=True, seconds=60)
+    scheduler.add_job(birthday.birthday_check, 'cron', id='birthday_check', replace_existing=True, hour=11)
+    scheduler.add_job(my_data.dump_file, 'cron', id='dump_file', replace_existing=True, hour=6)
 
-        my_bot.skip_pending = False
+    my_bot.skip_pending = False
+    my_bot.set_update_listener(handle_messages)
 
-        # Запуск Long Poll бота
-        my_bot.set_update_listener(handle_messages)
-        while True:
-            try:
-                my_bot.polling(none_stop=True, interval=1, timeout=60)
-            except requests.exceptions.ConnectionError as e:
-                time.sleep(1)
+    action_log("Running bot!")
 
-    # из-за Telegram API иногда какой-нибудь пакет не доходит
-    except requests.exceptions.ReadTimeout as e:
-        action_log("Read Timeout. Because of Telegram API. We are offline. Reconnecting in 5 seconds.")
-        time.sleep(5)
+    while True:
+        try:
+            scheduler.start()
 
-    # если пропало соединение, то пытаемся снова
-    # except requests.exceptions.ConnectionError as e:
-    #     action_log("Connection Error. We are offline. Reconnecting...")
-    #     time.sleep(5)
+            if os.path.isfile(config.FileLocation.bot_killed):
+                os.remove(config.FileLocation.bot_killed)
 
-    # если Python сдурит и пойдёт в бесконечную рекурсию (не особо спасает)
-    except RecursionError as e:
-        action_log("Recursion Error. Restarting...")
-        os._exit(0)
+            my_bot.init_name()
 
-    # если Python сдурит и пойдёт в бесконечную рекурсию (не особо спасает)
-    except RuntimeError as e:
-        action_log("Runtime Error. Retrying in 3 seconds.")
-        time.sleep(3)
+            # Запуск Long Poll бота
+            my_bot.polling(none_stop=True, interval=1, timeout=60)
 
-    # кто-то обратился к боту на кириллице
-    except UnicodeEncodeError as e:
-        action_log("Unicode Encode Error. Someone typed in cyrillic. Retrying in 3 seconds.")
-        time.sleep(3)
+        except requests.exceptions.ReadTimeout as e:
+            action_log("Read Timeout. Reconnecting in 5 seconds.")
+            time.sleep(5)
 
-    # завершение работы из консоли стандартным Ctrl-C
-    except KeyboardInterrupt as e:
-        action_log("Keyboard Interrupt. Good bye.")
-        global_lock.acquire()
-        message_dump_lock.acquire()
-        os._exit(0)
+        except requests.exceptions.ConnectionError as e:
+            # action_log("Connection Error. Reconnecting...")
+            time.sleep(1)
+
+        except KeyboardInterrupt as e:
+            action_log("Keyboard Interrupt. Good bye.")
+            global_lock.acquire()
+            message_dump_lock.acquire()
+            os._exit(0)
+
+        scheduler.shutdown()

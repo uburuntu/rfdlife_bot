@@ -5,7 +5,7 @@ import json
 import config
 import tokens
 from utils.common_utils import action_log, bold, chat_info, curr_time, global_lock, is_non_zero_file, link_user, my_bot, \
-    my_bot_name, send_file, subs_notify, user_action_log, user_name
+    send_file, subs_notify, user_action_log, user_name
 from utils.settings import UserSettings
 
 
@@ -33,9 +33,9 @@ class DataManager:
     def dump_file(self, message=None):
         if tokens.dumping_channel_id != '':
             msg_1 = send_file(tokens.dumping_channel_id, self.file_name,
-                              caption='{}: dump user db | {}'.format(my_bot_name, curr_time()))
+                              caption='{}: dump user db | {}'.format(my_bot.name, curr_time()))
             msg_2 = send_file(tokens.dumping_channel_id, config.FileLocation.bot_logs,
-                              caption='{}: dump logs | {}'.format(my_bot_name, curr_time()))
+                              caption='{}: dump logs | {}'.format(my_bot.name, curr_time()))
             if message is None:
                 action_log('Scheduled job: data dumped to ' + chat_info(msg_2.chat))
             else:

@@ -8,10 +8,14 @@ from telebot.apihelper import ApiException
 class TelebotWrapper(telebot.TeleBot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.name = ''
 
     @staticmethod
     def log(text):
         print("Telegram api exception: {}\n{}\n".format(datetime.now().strftime('%d/%m/%Y %H:%M:%S'), text))
+
+    def init_name(self):
+        self.name = '@' + self.get_me().username
 
     def send_message(self, chat_id, text, disable_web_page_preview=None, reply_to_message_id=None, reply_markup=None,
                      parse_mode=None, disable_notification=None):
