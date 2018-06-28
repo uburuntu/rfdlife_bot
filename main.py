@@ -136,6 +136,14 @@ def command_alert(message):
     stats.stats(message)
 
 
+@my_bot.message_handler(func=commands_handler(['/users_stats']))
+@my_data.command_need_name
+@command_with_delay(delay=1)
+def command_alert(message):
+    user_action_log(message, 'called ' + message.text)
+    stats.users_stats(message)
+
+
 @my_bot.message_handler(func=commands_handler(['/playroom']))
 @my_data.command_need_name
 @command_with_delay(delay=1)
