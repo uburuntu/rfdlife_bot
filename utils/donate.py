@@ -30,7 +30,7 @@ def donate(message):
 
 def pre_checkout(pre_checkout_query):
     my_bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True,
-                                     error_message="Возникла очень грустная ошибка, попробуйте заново")
+                                     error_message='Возникла очень грустная ошибка, попробуйте заново')
 
 
 def got_payment(message):

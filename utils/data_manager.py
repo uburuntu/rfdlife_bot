@@ -15,7 +15,7 @@ class DataManager:
         self.data = dict()
         self.load()
 
-        self.asc_link = '<a href=\"https://corp.rfdyn.ru/index.php/acs-tabel-intermediadate/\">СКД</a>'
+        self.asc_link = '<a href=\'https://corp.rfdyn.ru/index.php/acs-tabel-intermediadate/\'>СКД</a>'
 
     def load(self):
         if is_non_zero_file(self.file_name):
@@ -44,7 +44,7 @@ class DataManager:
     def command_need_name(self, func):
         def wrapped(message):
             if not self.is_registered(message) or not self.is_name_set(message):
-                user_action_log(message, "not registered to call: " + message.text)
+                user_action_log(message, 'not registered to call: ' + message.text)
                 self.register_user(message)
                 return
             return func(message)
@@ -64,30 +64,30 @@ class DataManager:
         return False
 
     def check_password(self, message):
-        if tokens.access_pswd != "" and message.text == tokens.access_pswd:
+        if tokens.access_pswd != '' and message.text == tokens.access_pswd:
             if self.data.get(str(message.from_user.id)) is None:
-                self.data[str(message.from_user.id)] = {"authenticated": "True"}
+                self.data[str(message.from_user.id)] = {'authenticated': 'True'}
             else:
-                self.data[str(message.from_user.id)]["authenticated"] = "True"
-            user_action_log(message, "successfully registered")
-            my_bot.reply_to(message, "✅ Пароль верный!")
+                self.data[str(message.from_user.id)]['authenticated'] = 'True'
+            user_action_log(message, 'successfully registered')
+            my_bot.reply_to(message, '✅ Пароль верный!')
             subs_notify(config.admin_ids, '✨ Новый пользователь: {}'.format(link_user(message.from_user)))
             my_data.data[str(message.from_user.id)]['who'] = user_name(message.from_user)
             self.register_user(message)
         else:
-            user_action_log(message, "entered wrong password")
-            my_bot.reply_to(message, "⛔ Пароль не подошел!\n\nВызывай /start для новой попытки.")
+            user_action_log(message, 'entered wrong password')
+            my_bot.reply_to(message, '⛔ Пароль не подошел!\n\nВызывай /start для новой попытки.')
 
     def register_user(self, message):
         if not self.is_registered(message):
             sent = my_bot.send_message(message.from_user.id,
-                                       bold('❗️ Авторизация') + '\n\nВведи пароль:', parse_mode="HTML")
+                                       bold('❗️ Авторизация') + '\n\nВведи пароль:', parse_mode='HTML')
             my_bot.register_next_step_handler(sent, self.check_password)
             return
 
         sent = my_bot.send_message(message.from_user.id,
                                    '❓ Твой номер в {}?\nНапример: 5059, 5060 и т.д.'.format(self.asc_link),
-                                   parse_mode="HTML")
+                                   parse_mode='HTML')
         my_bot.register_next_step_handler(sent, self.set_user_name)
 
     def set_user_name(self, message):
@@ -101,9 +101,9 @@ class DataManager:
     def register_user_finish(self, message):
         my_data.data[str(message.from_user.id)]['settings'] = UserSettings()
         self.save()
-        my_bot.reply_to(message, '✅ Данные сохранены', parse_mode="HTML", disable_web_page_preview=True)
+        my_bot.reply_to(message, '✅ Данные сохранены', parse_mode='HTML', disable_web_page_preview=True)
         with open(config.FileLocation.cmd_help, 'r', encoding='utf-8') as file:
-            my_bot.send_message(message.from_user.id, file.read(), parse_mode="HTML", disable_web_page_preview=True)
+            my_bot.send_message(message.from_user.id, file.read(), parse_mode='HTML', disable_web_page_preview=True)
 
     def list_users(self, for_what=None):
         all_users = self.data.keys()
@@ -133,7 +133,7 @@ class DataManager:
             my_bot.reply_to(message, '📣️ Оповещения о {} включены!'.format(split[1]))
         else:
             my_bot.reply_to(message, 'Использование: /alert_add [ФИО в соответствии записи в {}]\n'
-                                     'Ваш список оповещений: /alert'.format(self.asc_link), parse_mode="HTML")
+                                     'Ваш список оповещений: /alert'.format(self.asc_link), parse_mode='HTML')
 
     def erase_alert_name(self, message):
         split = message.text.split(' ', 1)
@@ -145,7 +145,7 @@ class DataManager:
                     my_bot.reply_to(message, '📣️ Оповещения о {} выключены!'.format(split[1]))
                     return
         my_bot.reply_to(message, 'Использование: /alert_erase [ФИО в соответствии записи в {}]\n'
-                                 'Ваш список оповещений: /alert'.format(self.asc_link), parse_mode="HTML")
+                                 'Ваш список оповещений: /alert'.format(self.asc_link), parse_mode='HTML')
 
     def list_alert_name(self, message):
         users = self.data[str(message.from_user.id)].get('alert_users')

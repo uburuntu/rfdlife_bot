@@ -65,7 +65,7 @@ def users(message):
         user_commands_count = user_counter[user_id]
         text += '{}. {} — {}\n'.format(count, link(user['who'], user_id), user_commands_count)
         count += 1
-    my_bot.reply_to(message, "{}".format(text), parse_mode="HTML")
+    my_bot.reply_to(message, '{}'.format(text), parse_mode='HTML')
 
 
 def commands(message):
@@ -81,4 +81,4 @@ def commands(message):
     for cmd in commands_most:
         text += '{}. {} — {}\n'.format(count, *cmd)
         count += 1
-    my_bot.reply_to(message, "{}".format(text), parse_mode="HTML")
+    my_bot.reply_to(message, '{}'.format(text), parse_mode='HTML')

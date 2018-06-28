@@ -23,7 +23,7 @@ class AcsManager:
         self.asc_unaccessible_error = 'Сервер СКД сейчас недоступен :('
 
         self.keyboard = types.InlineKeyboardMarkup()
-        self.keyboard.add(types.InlineKeyboardButton(text="🔄", callback_data="in_office_update"))
+        self.keyboard.add(types.InlineKeyboardButton(text='🔄', callback_data='in_office_update'))
 
     @staticmethod
     def time_format(time):
@@ -35,13 +35,13 @@ class AcsManager:
         work_days = numpy.busday_count(start_date, end_date) if start_date != end_date else int(
                 start_date.weekday() < 5)
         work_time_need = week_work_hours / 5 * work_days
-        time_split = [int(x) for x in time_in.split(":")]
+        time_split = [int(x) for x in time_in.split(':')]
         remain_secs = (timedelta(hours=work_time_need) - timedelta(hours=time_split[0], minutes=time_split[1],
                                                                    seconds=time_split[2])).total_seconds()
         below_zero = '-' if remain_secs < 0 else ''
         remain_hours, remain_secs = divmod(abs(remain_secs), 60 * 60)
         remain_minutes, remain_secs = divmod(remain_secs, 60)
-        return "{}{:.0f}:{:02.0f}:{:02.0f}".format(below_zero, remain_hours, remain_minutes, remain_secs)
+        return '{}{:.0f}:{:02.0f}:{:02.0f}'.format(below_zero, remain_hours, remain_minutes, remain_secs)
 
     @staticmethod
     def reply_format(text, start_date, end_date, week_work_hours):
@@ -93,16 +93,16 @@ class AcsManager:
             beg, end = day, day
 
         if abs(datetime.today().year - day.year) > 4:
-            return "Иногда нужно остановиться и насладиться текущим моментом 🦄", None
+            return 'Иногда нужно остановиться и насладиться текущим моментом 🦄', None
 
         prev, next = beg - timedelta(days=1), end + timedelta(days=1)
         keyboard = types.InlineKeyboardMarkup()
         keyboard.add(
-                types.InlineKeyboardButton(text="⬅️",
-                                           callback_data="time_{}_{}".format(cmd, prev.strftime('%d/%m/%Y'))),
-                types.InlineKeyboardButton(text="🔄", callback_data="time_{}_{}".format(cmd, day.strftime('%d/%m/%Y'))),
-                types.InlineKeyboardButton(text="➡️",
-                                           callback_data="time_{}_{}".format(cmd, next.strftime('%d/%m/%Y'))))
+                types.InlineKeyboardButton(text='⬅️',
+                                           callback_data='time_{}_{}'.format(cmd, prev.strftime('%d/%m/%Y'))),
+                types.InlineKeyboardButton(text='🔄', callback_data='time_{}_{}'.format(cmd, day.strftime('%d/%m/%Y'))),
+                types.InlineKeyboardButton(text='➡️',
+                                           callback_data='time_{}_{}'.format(cmd, next.strftime('%d/%m/%Y'))))
         return self._make_time_request(user_id, beg, end), keyboard
 
     def reply_time_update(self, call):
@@ -110,10 +110,10 @@ class AcsManager:
         cmd = split[1]
         day = datetime.strptime(split[2], '%d/%m/%Y')
         text, keyboard = self.reply_time_data(call.from_user.id, cmd, day)
-        my_bot.answer_callback_query(callback_query_id=call.id, show_alert=False, text="✅  Сообщение обновлено")
+        my_bot.answer_callback_query(callback_query_id=call.id, show_alert=False, text='✅  Сообщение обновлено')
         my_bot.edit_message_text(text,
                                  chat_id=call.message.chat.id, message_id=call.message.message_id,
-                                 reply_markup=keyboard, parse_mode="HTML")
+                                 reply_markup=keyboard, parse_mode='HTML')
 
     def reply_time(self, message):
         split = re.findall('/(\w*)(?:@\w*)?\s*([\d/]*)', message.text)[0]
@@ -123,7 +123,7 @@ class AcsManager:
         except ValueError:
             day = datetime.today()
         text, keyboard = self.reply_time_data(message.from_user.id, cmd, day)
-        my_bot.reply_to(message, text, reply_markup=keyboard, parse_mode="HTML")
+        my_bot.reply_to(message, text, reply_markup=keyboard, parse_mode='HTML')
 
     def _make_time_request(self, user_id, start_date, end_date):
         payload = (('AcsTabelIntermediadateSearch[staff_id]', my_data.get_user_name(user_id)),
@@ -144,15 +144,15 @@ class AcsManager:
 
     def in_office_now(self, message):
         text = self.in_office_now_text(message.from_user.id)
-        my_bot.reply_to(message, text, reply_markup=self.keyboard, parse_mode="HTML")
+        my_bot.reply_to(message, text, reply_markup=self.keyboard, parse_mode='HTML')
 
     def in_office_update(self, call):
         message = call.message
         text = self.in_office_now_text(message.chat.id)
-        my_bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=text, parse_mode="HTML")
+        my_bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=text, parse_mode='HTML')
         my_bot.edit_message_reply_markup(chat_id=message.chat.id, message_id=message.message_id,
                                          reply_markup=self.keyboard)
-        my_bot.answer_callback_query(callback_query_id=call.id, show_alert=False, text="✅  Данные обновлены")
+        my_bot.answer_callback_query(callback_query_id=call.id, show_alert=False, text='✅  Данные обновлены')
 
     def in_office_alert(self):
         def need_alert():
@@ -192,7 +192,7 @@ class AcsManager:
 
         response = requests.get(self.acs_url, auth=(tokens.auth_login, tokens.auth_pswd), params=payload)
         answer = self.state_format(response.text) if response.ok else self.asc_unaccessible_error
-        my_bot.reply_to(message, answer, parse_mode="HTML")
+        my_bot.reply_to(message, answer, parse_mode='HTML')
 
     @TimeMemoize(delay=5 * 60 + 5)
     def is_user_in_office(self, user_id):

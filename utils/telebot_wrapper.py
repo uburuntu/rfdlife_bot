@@ -12,7 +12,7 @@ class TelebotWrapper(telebot.TeleBot):
 
     @staticmethod
     def log(text):
-        print("Telegram api exception: {}\n{}\n".format(datetime.now().strftime('%d/%m/%Y %H:%M:%S'), text))
+        print('Telegram api exception: {}\n{}\n'.format(datetime.now().strftime('%d/%m/%Y %H:%M:%S'), text))
 
     def init_name(self):
         self.name = '@' + self.get_me().username
@@ -23,4 +23,4 @@ class TelebotWrapper(telebot.TeleBot):
             return super().send_message(chat_id, text, disable_web_page_preview, reply_to_message_id, reply_markup,
                                         parse_mode, disable_notification)
         except ApiException as e:
-            self.log(f"{e},\nchat_id={chat_id}, text=({text})")
+            self.log(f'{e},\nchat_id={chat_id}, text=({text})')

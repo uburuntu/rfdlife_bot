@@ -52,7 +52,7 @@ class Botan:
             data = self.dict_from_message(message)
             event_name = data.get('bot_command', 'Text message')
             r = requests.post(self.TRACK_URL,
-                              params={"token": self.botan_token, "uid": message.from_user.id, "name": event_name},
+                              params={'token': self.botan_token, 'uid': message.from_user.id, 'name': event_name},
                               data=data,
                               headers={'Content-type': 'application/json'})
             return r.json()
@@ -65,9 +65,9 @@ class Botan:
             return False
 
     def shorten_url(self, url, user_id):
-        """
+        '''
         Shorten URL for specified user of a bot
-        """
+        '''
         try:
             return requests.get(self.SHORTENER_URL,
                                 params={'token': self.botan_token, 'url': url, 'user_ids': str(user_id)}

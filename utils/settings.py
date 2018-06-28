@@ -76,11 +76,11 @@ class UserSettings:
     def generate_settings_buttons(self):
         keyboard = types.InlineKeyboardMarkup()
         for name, setting in self.settings_info.items():
-            keyboard.row(types.InlineKeyboardButton(text=setting.show_name, callback_data="settings_help_" + name),
-                         types.InlineKeyboardButton(text=setting.get_showing(), callback_data="settings_" + name))
+            keyboard.row(types.InlineKeyboardButton(text=setting.show_name, callback_data='settings_help_' + name),
+                         types.InlineKeyboardButton(text=setting.get_showing(), callback_data='settings_' + name))
 
-        keyboard.row(types.InlineKeyboardButton(text="❎ Сброс настроек", callback_data="settings_default"))
-        keyboard.row(types.InlineKeyboardButton(text="🆗 Закрыть настройки", callback_data="settings_close"))
+        keyboard.row(types.InlineKeyboardButton(text='❎ Сброс настроек', callback_data='settings_default'))
+        keyboard.row(types.InlineKeyboardButton(text='🆗 Закрыть настройки', callback_data='settings_close'))
         return keyboard
 
     def settings_update(self, call):
@@ -98,7 +98,7 @@ class UserSettings:
         elif cmd_name == 'close':
             my_bot.answer_callback_query(callback_query_id=call.id)
             my_bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id,
-                                     text="🆗 Настройки закрыты", parse_mode="HTML")
+                                     text='🆗 Настройки закрыты', parse_mode='HTML')
             return
         elif cmd_name == 'default':
             self.defaultify_all()
@@ -106,6 +106,6 @@ class UserSettings:
             self.settings_info[cmd_name].next()
             self.data[cmd_name] = self.settings_info[cmd_name].get()
 
-        my_bot.answer_callback_query(callback_query_id=call.id, show_alert=False, text="✅  Настройки обновлены")
+        my_bot.answer_callback_query(callback_query_id=call.id, show_alert=False, text='✅  Настройки обновлены')
         my_bot.edit_message_reply_markup(chat_id=message.chat.id, message_id=message.message_id,
                                          reply_markup=self.generate_settings_buttons())

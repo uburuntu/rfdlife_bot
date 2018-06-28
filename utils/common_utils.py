@@ -59,14 +59,14 @@ def curr_time():
 
 
 def action_log(text):
-    print("{}\n{}\n".format(curr_time(), text))
+    print('{}\n{}\n'.format(curr_time(), text))
 
 
 def user_action_log(message, text):
     if hasattr(message, 'chat'):
-        print("{}, {}\nUser {} {}\n".format(curr_time(), chat_info(message.chat), user_info(message.from_user), text))
+        print('{}, {}\nUser {} {}\n'.format(curr_time(), chat_info(message.chat), user_info(message.from_user), text))
     else:
-        print("{}\nUser {} {}\n".format(curr_time(), user_info(message.from_user), text))
+        print('{}\nUser {} {}\n'.format(curr_time(), user_info(message.from_user), text))
 
 
 def is_command():
@@ -84,7 +84,7 @@ def command_with_delay(delay=10):
             now = datetime.now().timestamp()
             diff = now - func.last_call if hasattr(func, 'last_call') else now
             if diff < delay:
-                user_action_log(message, "called {} after {} sec, delay is {}".format(func, round(diff), delay))
+                user_action_log(message, 'called {} after {} sec, delay is {}'.format(func, round(diff), delay))
                 return
             func.last_call = now
 
@@ -120,7 +120,7 @@ def check_outdated_callback(delay, cmd):
             if datetime.now().timestamp() - message.date > delay:
                 my_bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id,
                                          text='{}\n\nЭто сообщение устарело! Используй {}.'.format(message.text, cmd))
-                my_bot.answer_callback_query(callback_query_id=call.id, text="Это сообщение устарело!")
+                my_bot.answer_callback_query(callback_query_id=call.id, text='Это сообщение устарело!')
                 return
 
             return func(call)
@@ -191,7 +191,7 @@ def dump_messages(all_messages):
 
 
 class TimeMemoize(object):
-    """Memoize with timeout"""
+    '''Memoize with timeout'''
     _caches = {}
     _delays = {}
 
@@ -199,7 +199,7 @@ class TimeMemoize(object):
         self.delay = delay
 
     def collect(self):
-        """Clear cache of results which have timed out"""
+        '''Clear cache of results which have timed out'''
         for func in self._caches:
             cache = {}
             for key in self._caches[func]:
@@ -228,12 +228,12 @@ class TimeMemoize(object):
 
 
 def cut_long_text(text, max_len=4000):
-    """
+    '''
     Функция для нарезки длинных сообщений по переносу строк или по точке в конце предложения или по пробелу
     :param text: тескт для нарезки
     :param max_len: длина, которую нельзя превышать
     :return: список текстов меньше max_len, суммарно дающий text
-    """
+    '''
     last_cut = 0
     space_anchor = 0
     dot_anchor = 0
@@ -272,28 +272,28 @@ def cut_long_text(text, max_len=4000):
     yield text[last_cut:]
 
 
-def bold(text, mode="html"):
-    if mode.lower() == "html":
-        return "<b>{}</b>".format(text)
-    if mode.lower() == "markdown":
-        return "*{}*".format(text)
+def bold(text, mode='html'):
+    if mode.lower() == 'html':
+        return '<b>{}</b>'.format(text)
+    if mode.lower() == 'markdown':
+        return '*{}*'.format(text)
 
 
-def link(text, user_id, mode="html"):
-    if mode.lower() == "html":
-        return "<a href=\"tg://user?id={0}\">{1}</a>".format(user_id, text)
-    if mode.lower() == "markdown":
-        return "[{1}](tg://user?id={0})".format(user_id, text)
+def link(text, user_id, mode='html'):
+    if mode.lower() == 'html':
+        return '<a href=\'tg://user?id={0}\'>{1}</a>'.format(user_id, text)
+    if mode.lower() == 'markdown':
+        return '[{1}](tg://user?id={0})'.format(user_id, text)
 
 
-def link_user(user, mode="html"):
-    if mode.lower() == "html":
-        return "<a href=\"tg://user?id={0}\">{1}</a>".format(user.id, user_name(user))
-    if mode.lower() == "markdown":
-        return "[{1}](tg://user?id={0})".format(user.id, user_name(user))
+def link_user(user, mode='html'):
+    if mode.lower() == 'html':
+        return '<a href=\'tg://user?id={0}\'>{1}</a>'.format(user.id, user_name(user))
+    if mode.lower() == 'markdown':
+        return '[{1}](tg://user?id={0})'.format(user.id, user_name(user))
 
 
 def subs_notify(subs, text, keyboard=None, me=None):
     for chat_id in subs:
         if chat_id != me:
-            my_bot.send_message(chat_id, text, parse_mode="HTML", reply_markup=keyboard)
+            my_bot.send_message(chat_id, text, parse_mode='HTML', reply_markup=keyboard)
