@@ -332,16 +332,14 @@ def handle_messages(messages):
 if __name__ == '__main__':
     # Настройка глобальных переменных
     apihelper.proxy = {
-        'http' : 'socks5://telegram:telegram@rmpufgh1.teletype.live:1080',
-        'https': 'socks5://telegram:telegram@rmpufgh1.teletype.live:1080'
+        'http' : 'socks5://telegram:telegram@sr123.spry.fail:1080',
+        'https': 'socks5://telegram:telegram@sr123.spry.fail:1080'
     }
 
     botan = Botan(tokens.botan_token)
 
     scheduler = BackgroundScheduler()
-    scheduler.add_job(my_acs.in_office_alert, 'interval', id='in_office_alert', replace_existing=True, seconds=60)
-    scheduler.add_job(birthday.birthday_check, 'cron', id='birthday_check', replace_existing=True, hour=11)
-    scheduler.add_job(my_data.dump_file, 'cron', id='dump_file', replace_existing=True, hour=6)
+    scheduler.start()
 
     my_bot.skip_pending = False
     my_bot.set_update_listener(handle_messages)
@@ -350,7 +348,9 @@ if __name__ == '__main__':
 
     while True:
         try:
-            scheduler.start()
+            scheduler.add_job(my_acs.in_office_alert, 'interval', id='in_office_alert', replace_existing=True, seconds=60)
+            scheduler.add_job(birthday.birthday_check, 'cron', id='birthday_check', replace_existing=True, hour=11)
+            scheduler.add_job(my_data.dump_file, 'cron', id='dump_file', replace_existing=True, hour=6)
 
             if os.path.isfile(config.FileLocation.bot_killed):
                 os.remove(config.FileLocation.bot_killed)
@@ -374,4 +374,4 @@ if __name__ == '__main__':
             message_dump_lock.acquire()
             os._exit(0)
 
-        scheduler.shutdown()
+        scheduler.remove_all_jobs()
