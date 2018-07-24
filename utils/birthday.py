@@ -8,7 +8,7 @@ import requests
 
 import tokens
 from utils.acs_manager import my_acs
-from utils.common_utils import action_log, my_bot, subs_notify
+from utils.common_utils import action_log, my_bot, skip_exception, subs_notify
 from utils.data_manager import my_data
 
 happy_emoji = ['🔥', '✨', '🎂', '🍰', '🎉', '🎊', '🎁', '🎈']
@@ -35,6 +35,7 @@ def birthdays_get():
     return drs_parsed
 
 
+@skip_exception(requests.exceptions.ConnectionError)
 def birthday_check():
     action_log('Scheduled job: launched birthday check')
 

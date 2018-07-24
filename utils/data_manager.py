@@ -2,10 +2,12 @@
 # _*_ coding: utf-8 _*_
 import json
 
+import requests
+
 import config
 import tokens
 from utils.common_utils import action_log, bold, chat_info, curr_time, global_lock, is_non_zero_file, link_user, my_bot, \
-    send_file, subs_notify, user_action_log, user_name
+    send_file, skip_exception, subs_notify, user_action_log, user_name
 from utils.settings import UserSettings
 
 
@@ -30,6 +32,7 @@ class DataManager:
             json.dump(self.data, file, cls=DataJsonEncoder, indent=True, ensure_ascii=False)
         global_lock.release()
 
+    @skip_exception(requests.exceptions.ConnectionError)
     def dump_file(self, message=None):
         if tokens.dumping_channel_id != '':
             msg_1 = send_file(tokens.dumping_channel_id, self.file_name,
@@ -66,9 +69,8 @@ class DataManager:
     def check_password(self, message):
         if tokens.access_pswd != '' and message.text == tokens.access_pswd:
             if self.data.get(str(message.from_user.id)) is None:
-                self.data[str(message.from_user.id)] = {'authenticated': 'True'}
-            else:
-                self.data[str(message.from_user.id)]['authenticated'] = 'True'
+                self.data[str(message.from_user.id)] = {}
+            self.data[str(message.from_user.id)]['authenticated'] = 'True'
             user_action_log(message, 'successfully registered')
             my_bot.reply_to(message, '✅ Пароль верный!')
             subs_notify(config.admin_ids, '✨ Новый пользователь: {}'.format(link_user(message.from_user)))
@@ -169,8 +171,8 @@ class DataJsonEncoder(json.JSONEncoder):
 
 
 class DataJsonDecoder(json.JSONDecoder):
-    def __init__(self, *args, **kargs):
-        json.JSONDecoder.__init__(self, object_hook=self.dict_to_object, *args, **kargs)
+    def __init__(self, *args, **kwargs):
+        json.JSONDecoder.__init__(self, object_hook=self.dict_to_object, *args, **kwargs)
 
     @staticmethod
     def dict_to_object(d):

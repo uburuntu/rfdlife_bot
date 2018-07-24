@@ -9,7 +9,7 @@ from telebot import types
 
 import config
 import tokens
-from utils.common_utils import TimeMemoize, bold, is_non_zero_file, my_bot
+from utils.common_utils import TimeMemoize, bold, is_non_zero_file, my_bot, skip_exception
 from utils.data_manager import my_data
 
 
@@ -154,6 +154,7 @@ class AcsManager:
                                          reply_markup=self.keyboard)
         my_bot.answer_callback_query(callback_query_id=call.id, show_alert=False, text='✅  Данные обновлены')
 
+    @skip_exception(requests.exceptions.ConnectionError)
     def in_office_alert(self):
         def need_alert():
             if my_data.get_user_settings(user_id)['alert_about_users'] == 'on':

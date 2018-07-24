@@ -4,10 +4,12 @@ import re
 from collections import Counter
 from datetime import datetime
 
+from tabulate import tabulate
+
 import config
 from utils.common_utils import bold, link, my_bot
 from utils.data_manager import my_data
-from tabulate import tabulate
+
 
 def stats(message):
     users_count = len(my_data.list_users())
@@ -33,7 +35,6 @@ def stats(message):
     user_pos = user_commands_counter.most_common().index((user_id, user_commands_count)) + 1
     all_commands_count = sum(user_commands_counter.values())
     all_callbacks_count = sum(user_callbacks_counter.values())
-
 
     days_from_birthday = (datetime.today() - datetime(year=2018, month=2, day=9)).days
 

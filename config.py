@@ -15,7 +15,6 @@ class FileLocation:
     camera_error = data_dir + 'camera_error.jpg'
 
     gen_dir = 'gen/'
-    dump_dir = gen_dir + 'dump/'
 
     bot_logs = gen_dir + 'bot_logs.txt'
     bot_killed = gen_dir + 'they_killed_me.txt'

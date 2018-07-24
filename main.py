@@ -2,6 +2,7 @@
 # _*_ coding: utf-8 _*_
 
 import os
+import sys
 import time
 
 import requests
@@ -10,14 +11,12 @@ from telebot import apihelper
 from telebot.apihelper import ApiException
 
 import config
-import tokens
 from utils import birthday, chai, donate, playroom, stats
 from utils.acs_manager import my_acs
 from utils.admin_tools import kill_bot, update_bot
-from utils.botan import Botan
 from utils.common_utils import action_log, bold, bot_admin_command, chai_user_command, check_outdated_callback, \
-    command_with_delay, commands_handler, cut_long_text, dump_messages, global_lock, is_command, link, \
-    message_dump_lock, my_bot, subs_notify, user_action_log
+    command_with_delay, commands_handler, cut_long_text, global_lock, is_command, link, \
+    my_bot, subs_notify, user_action_log
 from utils.data_manager import my_data
 
 
@@ -322,11 +321,7 @@ def admin_tools(message):
 
 # All messages handler
 def handle_messages(messages):
-    if None:
-        if tokens.botan_token != '':
-            for message in messages:
-                botan.track(message)
-        dump_messages(messages)
+    pass
 
 
 if __name__ == '__main__':
@@ -335,30 +330,25 @@ if __name__ == '__main__':
         'http' : 'socks5://telegram:telegram@sr123.spry.fail:1080',
         'https': 'socks5://telegram:telegram@sr123.spry.fail:1080'
     }
-
-    botan = Botan(tokens.botan_token)
-
-    scheduler = BackgroundScheduler()
-    scheduler.start()
-
     my_bot.skip_pending = False
     my_bot.set_update_listener(handle_messages)
-
     action_log('Running bot!')
+
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(my_acs.in_office_alert, 'interval', id='in_office_alert', replace_existing=True, seconds=60)
+    scheduler.add_job(birthday.birthday_check, 'cron', id='birthday_check', replace_existing=True, hour=11)
+    scheduler.add_job(my_data.dump_file, 'cron', id='dump_file', replace_existing=True, hour=6)
+    scheduler.start()
 
     while True:
         try:
-            scheduler.add_job(my_acs.in_office_alert, 'interval', id='in_office_alert', replace_existing=True, seconds=60)
-            scheduler.add_job(birthday.birthday_check, 'cron', id='birthday_check', replace_existing=True, hour=11)
-            scheduler.add_job(my_data.dump_file, 'cron', id='dump_file', replace_existing=True, hour=6)
-
             if os.path.isfile(config.FileLocation.bot_killed):
                 os.remove(config.FileLocation.bot_killed)
 
             my_bot.init_name()
 
             # Запуск Long Poll бота
-            my_bot.polling(none_stop=True, interval=1, timeout=60)
+            my_bot.polling(none_stop=True)
 
         except requests.exceptions.ReadTimeout as e:
             action_log('Read Timeout. Reconnecting in 5 seconds.')
@@ -371,7 +361,4 @@ if __name__ == '__main__':
         except KeyboardInterrupt as e:
             action_log('Keyboard Interrupt. Good bye.')
             global_lock.acquire()
-            message_dump_lock.acquire()
-            os._exit(0)
-
-        scheduler.remove_all_jobs()
+            sys.exit(0)

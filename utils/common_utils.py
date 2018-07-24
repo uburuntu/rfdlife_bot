@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # _*_ coding: utf-8 _*_
 
-import pickle
+import functools
 import re
 import threading
 from datetime import datetime
@@ -14,7 +14,6 @@ from utils.telebot_wrapper import TelebotWrapper
 my_bot = TelebotWrapper(tokens.bot, threaded=False)
 
 global_lock = threading.Lock()
-message_dump_lock = threading.Lock()
 
 
 def commands_handler(cmnds):
@@ -113,6 +112,20 @@ def chai_user_command(func):
     return wrapped
 
 
+def skip_exception(exception):
+    def my_decorator(func):
+        @functools.wraps(func)
+        def wrapped(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except exception:
+                pass
+
+        return wrapped
+
+    return my_decorator
+
+
 def check_outdated_callback(delay, cmd):
     def my_decorator(func):
         def wrapped(call):
@@ -157,37 +170,6 @@ def send_file(chat_id, file_name, **kwargs):
     if is_non_zero_file(file_name):
         with open(file_name, 'r', encoding='utf-8') as file:
             return my_bot.send_document(chat_id, file, **kwargs)
-
-
-def dump_messages(all_messages):
-    groups = {}
-    for message in all_messages:
-        dump_filename = config.FileLocation.dump_dir + 'dump_' + message.chat.type + '_' + str(
-                message.chat.id) + '.pickle'
-        if dump_filename in groups:
-            lst = groups[dump_filename]
-        else:
-            lst = []
-            groups[dump_filename] = lst
-        lst.append(message)
-
-    message_dump_lock.acquire()
-    for dump_filename, messages in groups.items():
-        if path.isfile(dump_filename):
-            f = open(dump_filename, 'rb+')
-            try:
-                file_messages = pickle.load(f)
-            except EOFError:
-                file_messages = []
-            file_messages.extend(messages)
-            f.seek(0)
-            f.truncate()
-        else:
-            f = open(dump_filename, 'xb')
-            file_messages = messages
-        pickle.dump(file_messages, f, pickle.HIGHEST_PROTOCOL)
-        f.close()
-    message_dump_lock.release()
 
 
 class TimeMemoize(object):
