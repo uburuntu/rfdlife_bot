@@ -77,6 +77,15 @@ def is_command():
     return wrapped
 
 
+def not_command():
+    def wrapped(message):
+        if message.text and not message.text.startswith('/'):
+            return True
+        return False
+
+    return wrapped
+
+
 def command_with_delay(delay=10):
     def my_decorator(func):
         def wrapped(message):
@@ -278,4 +287,7 @@ def link_user(user, mode='html'):
 def subs_notify(subs, text, keyboard=None, me=None):
     for chat_id in subs:
         if chat_id != me:
-            my_bot.send_message(chat_id, text, parse_mode='HTML', reply_markup=keyboard)
+            ret = my_bot.send_message(chat_id, text, parse_mode='HTML', reply_markup=keyboard)
+            if not ret and me:
+                my_bot.send_message(me, '⚠️ Сообщение {} не доставилось'.format(link('адресату', chat_id)),
+                                    parse_mode='HTML')

@@ -15,8 +15,8 @@ from utils import birthday, chai, donate, playroom, stats
 from utils.acs_manager import my_acs
 from utils.admin_tools import kill_bot, update_bot
 from utils.common_utils import action_log, bold, bot_admin_command, chai_user_command, check_outdated_callback, \
-    command_with_delay, commands_handler, cut_long_text, global_lock, is_command, link, \
-    my_bot, subs_notify, user_action_log
+    command_with_delay, commands_handler, cut_long_text, global_lock, is_command, link, my_bot, not_command, \
+    subs_notify, user_action_log
 from utils.data_manager import my_data
 
 
@@ -317,6 +317,14 @@ def admin_tools(message):
         update_bot(message)
     elif command == '/kill':
         kill_bot(message)
+
+
+@my_bot.message_handler(func=not_command())
+# @chai_user_command
+def chai_chat(message):
+    message.text = '/ch ' + message.text
+    user_action_log(message, 'called ' + message.text)
+    chai.chai_message(message)
 
 
 # All messages handler
