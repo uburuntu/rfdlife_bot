@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# _*_ coding: utf-8 _*_
-
 import functools
 import re
 import threading
@@ -182,7 +179,7 @@ def send_file(chat_id, file_name, **kwargs):
 
 
 class TimeMemoize(object):
-    '''Memoize with timeout'''
+    """Memoize with timeout"""
     _caches = {}
     _delays = {}
 
@@ -190,7 +187,7 @@ class TimeMemoize(object):
         self.delay = delay
 
     def collect(self):
-        '''Clear cache of results which have timed out'''
+        """Clear cache of results which have timed out"""
         for func in self._caches:
             cache = {}
             for key in self._caches[func]:
@@ -219,12 +216,12 @@ class TimeMemoize(object):
 
 
 def cut_long_text(text, max_len=4000):
-    '''
+    """
     Функция для нарезки длинных сообщений по переносу строк или по точке в конце предложения или по пробелу
     :param text: тескт для нарезки
     :param max_len: длина, которую нельзя превышать
     :return: список текстов меньше max_len, суммарно дающий text
-    '''
+    """
     last_cut = 0
     space_anchor = 0
     dot_anchor = 0

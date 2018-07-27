@@ -1,5 +1,3 @@
-# _*_ coding: utf-8 _*_
-
 import requests
 
 
@@ -65,9 +63,9 @@ class Botan:
             return False
 
     def shorten_url(self, url, user_id):
-        '''
+        """
         Shorten URL for specified user of a bot
-        '''
+        """
         try:
             return requests.get(self.SHORTENER_URL,
                                 params={'token': self.botan_token, 'url': url, 'user_ids': str(user_id)}

@@ -1,4 +1,3 @@
-# _*_ coding: utf-8 _*_
 import re
 from calendar import monthrange
 from datetime import datetime, timedelta

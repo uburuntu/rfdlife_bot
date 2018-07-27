@@ -6,10 +6,10 @@ NOTIFIED_KILL=0
 
 while true; do
     # Eсли бот лежит и не убит нами, или если не запущен вовсе, то воскрешаем его
-    if [ -e ${FILENAME} ] && [ ! -e ${FILENAME_KILL} ] || [ $(ps -ef | grep "main.py" | grep -v "grep" | wc -l) -eq "0" ] && [ ! -e ${FILENAME_KILL} ]; then
+    if [ -e ${FILENAME_KILL} ] && [ ! -e ${FILENAME_KILL} ] || [ $(ps -ef | grep "main.py" | grep -v "grep" | wc -l) -eq "0" ] && [ ! -e ${FILENAME_KILL} ]; then
         printf "Bot is down. Resurrecting it.\n-----------------------------\n\n"
         NOTIFIED_KILL=0
-        python3 -u main.py 2>&1 | tee -a -i $FILENAME_LOG
+        python3 -u main.py 2>&1 | tee -a -i ${FILENAME_LOG}
         # Что-то снова упало, уже после воскрешения бота
         printf "\n---------------------------\nBot has been stopped again.\n\n"
         sleep 3s;
@@ -18,7 +18,7 @@ while true; do
     elif [ -e ${FILENAME_KILL} ]; then
         if [ ${NOTIFIED_KILL} -eq "0" ]; then
             # Исправляем наши проблемы, меняем кодовое слово и удаляем алёрт файл
-            printf "Bot has been killed off.\nPlease restart it manually once you fixed everything or remove $FILENAME_KILL.\n\n"
+            printf "Bot has been killed off.\nPlease restart it manually once you fixed everything or remove ${FILENAME_KILL}.\n\n"
             NOTIFIED_KILL=1;
         else
             sleep 10s;

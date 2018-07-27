@@ -1,6 +1,3 @@
-# _*_ coding: utf-8 _*_
-
-
 # Пути к папкам и файлам
 class FileLocation:
     data_dir = 'data/'
@@ -30,4 +27,4 @@ chai_subscribers = [28006241,  # rmbk
                     49705579,  # krab
                     211145131]  # kobz
 
-admin_ids = [28006241, 155094831]  # , 173546332, 100610568]
+admin_ids = [28006241]

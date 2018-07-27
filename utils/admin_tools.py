@@ -1,6 +1,5 @@
-# !/usr/bin/env python
-# _*_ coding: utf-8 _*_
 import os
+import sys
 
 import config
 from utils.common_utils import my_bot, user_action_log, value_to_file
@@ -14,7 +13,7 @@ def kill_bot(message):
     my_bot.send_document(message.chat.id, 'https://t.me/mechmath/169445',
                          caption='Ухожу на отдых!', reply_to_message_id=message.message_id)
     user_action_log(message, 'remotely killed bot.')
-    os._exit(0)
+    sys.exit(0)
 
 
 def update_bot(message):

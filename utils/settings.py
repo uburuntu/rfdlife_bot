@@ -1,5 +1,3 @@
-# _*_ coding: utf-8 _*_
-
 from telebot import types
 
 from utils.common_utils import my_bot
