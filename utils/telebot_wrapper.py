@@ -6,7 +6,7 @@ import telebot
 from telebot.apihelper import ApiException
 
 
-def retry(exception, retries_count=3):
+def retry(exception, retries_count=5):
     def my_decorator(func):
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
@@ -19,7 +19,7 @@ def retry(exception, retries_count=3):
                 else:
                     break
             else:
-                TelebotWrapper.log(f'function {func.__name__}; {exc}')
+                TelebotWrapper.log_exception(exc, *args, **kwargs)
             return ret
 
         return wrapped
@@ -32,12 +32,21 @@ class TelebotWrapper(telebot.TeleBot):
         super().__init__(*args, **kwargs)
         self.name = ''
 
-    @staticmethod
-    def log(text):
-        print('{}\nTelegram api exception: {}\n'.format(datetime.now().strftime('%d/%m/%Y %H:%M:%S'), text))
-
     def init_name(self):
         self.name = '@' + self.get_me().username
+
+    @staticmethod
+    def log_exception(exc, *args, **kwargs):
+        def log(text):
+            curr_time = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+            print('{}\n{}\n'.format(curr_time, text))
+
+        if isinstance(exc, ApiException):
+            log('Telegram api exception: function {}; result {};'.format(exc.function_name, exc.result))
+        elif isinstance(exc, requests.exceptions.ConnectionError):
+            log('Telegram connection exception: {:.100};'.format(str(exc)))
+        else:
+            log('Exception: {};'.format(exc))
 
     @retry((ApiException, requests.exceptions.ConnectionError))
     def send_message(self, chat_id, text, disable_web_page_preview=None, reply_to_message_id=None, reply_markup=None,
