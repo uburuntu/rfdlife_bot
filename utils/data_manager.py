@@ -52,6 +52,16 @@ class DataManager:
 
         return wrapped
 
+    def callback_need_access(self, func):
+        def wrapped(call):
+            if not self.is_registered(call) or not self.is_name_set(call):
+                user_action_log(call, 'not registered to callback')
+                my_bot.answer_callback_query(callback_query_id=call.id, show_alert=False, text='⛔️ Нет доступа')
+                return
+            return func(call)
+
+        return wrapped
+
     def is_registered(self, message):
         if self.data.get(str(message.from_user.id)) is not None:
             if self.data.get(str(message.from_user.id)).get('authenticated', 'False') == 'True':

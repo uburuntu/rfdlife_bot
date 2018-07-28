@@ -192,18 +192,21 @@ def got_payment(message):
 
 @my_bot.callback_query_handler(func=lambda call: call.data.startswith('chai'))
 @check_outdated_callback(delay=15 * 60, cmd='/chai')
+@my_data.callback_need_access
 def callback_chai(call):
     user_action_log(call, 'callbacked ' + call.data)
     chai.chai_callback(call)
 
 
 @my_bot.callback_query_handler(func=lambda call: call.data.startswith('time'))
+@my_data.callback_need_access
 def callback_in_office(call):
     user_action_log(call, 'callbacked ' + call.data)
     my_acs.reply_time_update(call)
 
 
 @my_bot.callback_query_handler(func=lambda call: call.data.startswith('in_office'))
+@my_data.callback_need_access
 def callback_in_office(call):
     user_action_log(call, 'callbacked ' + call.data)
     my_acs.in_office_update(call)
@@ -211,6 +214,7 @@ def callback_in_office(call):
 
 @my_bot.callback_query_handler(func=lambda call: call.data.startswith('settings'))
 @check_outdated_callback(delay=15 * 60, cmd='/settings')
+@my_data.callback_need_access
 def callback_settings(call):
     user_action_log(call, 'callbacked ' + call.data)
     my_data.get_user_settings(call.from_user.id).settings_update(call)
