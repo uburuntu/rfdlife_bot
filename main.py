@@ -8,12 +8,13 @@ from telebot import apihelper
 from telebot.apihelper import ApiException
 
 import config
+import tokens
 from utils import birthday, chai, donate, playroom, stats
 from utils.acs_manager import my_acs
 from utils.admin_tools import kill_bot, update_bot
 from utils.common_utils import action_log, bold, bot_admin_command, chai_user_command, check_outdated_callback, \
     command_with_delay, commands_handler, cut_long_text, global_lock, is_command, link, my_bot, not_command, \
-    subs_notify, user_action_log
+    subs_notify, user_action_log, my_metrics
 from utils.data_manager import my_data
 
 
@@ -328,19 +329,21 @@ def chai_chat(message):
     chai.chai_message(message)
 
 
-# All messages handler
-def handle_messages(messages):
-    pass
+# All updates handler
+def handle_updates(updates):
+    if tokens.appmetrica_token != '':
+        for update in updates:
+            my_metrics.track(update)
 
 
 if __name__ == '__main__':
     # Настройка глобальных переменных
     apihelper.proxy = {
         'http' : 'socks5://telegram:telegram@sr123.spry.fail:1080',
-        'https': 'socks5://telegram:telegram@sr123.spry.fail:1080'
+        'https': 'socks5://telegram:telegram@sr123.spry.fail:1080',
     }
     my_bot.skip_pending = False
-    my_bot.set_update_listener(handle_messages)
+    my_bot.set_update_listener(handle_updates)
     action_log('Running bot!')
 
     scheduler = BackgroundScheduler()

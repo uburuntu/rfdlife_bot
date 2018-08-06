@@ -1,21 +1,24 @@
+import json
+
 import requests
 
 
-class Botan:
-    def __init__(self, botan_token):
-        self.botan_token = botan_token
-        self.TRACK_URL = 'https://api.botan.io/track'
-        self.SHORTENER_URL = 'https://api.botan.io/s/'
+class AppMetrica:
+    def __init__(self, appmetrica_token, application_id):
+        self.appmetrica_token = appmetrica_token
+        self.application_id = application_id
+        self.POST_API_URL = 'https://api.appmetrica.yandex.com/logs/v1/import/events'
 
     @staticmethod
-    def dict_from_message(message):
+    def dict_from_update(update):
         # Можно модифицировать для сбора конкретной информации
         data = dict()
 
-        data['message_id'] = message.message_id
-        data['content_type'] = message.content_type
+        data['date'] = update.date
+        data['message_id'] = update.message_id
+        data['content_type'] = update.content_type
 
-        user = message.from_user
+        user = update.from_user
         data['from'] = dict()
         data['from']['id'] = user.id
         data['from']['first_name'] = user.first_name
@@ -26,7 +29,7 @@ class Botan:
         if isinstance(user.language_code, str):
             data['from']['language_code'] = user.language_code
 
-        chat = message.chat
+        chat = update.chat
         data['chat'] = dict()
         data['chat']['id'] = chat.id
         data['chat']['type'] = chat.type
@@ -35,40 +38,39 @@ class Botan:
         if isinstance(chat.username, str):
             data['chat']['username'] = chat.username
 
-        text = message.text
+        text = update.text
         if isinstance(text, str):
             data['text'] = text
-            if message.entities is not None:
-                for entity in message.entities:
+            if update.entities is not None:
+                for entity in update.entities:
                     if entity.type == 'bot_command':
                         data['bot_command'] = text[entity.offset:entity.length].split('@')[0]
+                        break
 
         return data
 
-    def track(self, message):
+    def track(self, update):
         try:
-            data = self.dict_from_message(message)
-            event_name = data.get('bot_command', 'Text message')
-            r = requests.post(self.TRACK_URL,
-                              params={'token': self.botan_token, 'uid': message.from_user.id, 'name': event_name},
-                              data=data,
-                              headers={'Content-type': 'application/json'})
-            return r.json()
+            # API Manual: tech.yandex.ru/appmetrica/doc/mobile-api/post/post-import-events-docpage/
+            data = self.dict_from_update(update)
+            event_name = data.get('bot_command', 'text')
+
+            payload = (
+                # Required fields
+                ('post_api_key', self.appmetrica_token),
+                ('application_id', self.application_id),
+                ('event_name', event_name),
+                ('event_timestamp', data['date']),
+                # Optional fields
+                ('profile_id', data['from']['id']),
+                ('device_locale', data['from'].get('language_code', '')),
+                ('event_json', json.dumps(data, ensure_ascii=False)),
+            )
+
+            r = requests.post(self.POST_API_URL, params=payload)
+            return r.ok
         except requests.exceptions.Timeout:
             # set up for a retry, or continue in a retry loop
             return False
         except (requests.exceptions.RequestException, ValueError) as e:
-            # catastrophic error
-            # print(e)
             return False
-
-    def shorten_url(self, url, user_id):
-        """
-        Shorten URL for specified user of a bot
-        """
-        try:
-            return requests.get(self.SHORTENER_URL,
-                                params={'token': self.botan_token, 'url': url, 'user_ids': str(user_id)}
-                                ).text
-        except:
-            return url
