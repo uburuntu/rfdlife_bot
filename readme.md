@@ -45,9 +45,14 @@ pip3 install -r requirements.txt
 
 ### 2. Выставить токены и пароли для доступа
 
-Получить токен бота можно через [@BotFather](https://t.me/BotFather).
+Получить токен Telegram-бота можно через [@BotFather](https://t.me/BotFather).
 
-Подробнее про способы выставления в файле [tokens.py](https://github.com/uburuntu/rfdlife_bot/blob/master/tokens.py).
+Подробнее про способы выставления в файле [tokens.py](tokens.py).
+
+### 3. Запуск
+
+Запустить [main.py](main.py) вручную или через скрипт-обёртку [run.sh](run.sh) для автоматического перезапуска.
+
 
 ## Связанные сервисы
 

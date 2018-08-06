@@ -15,7 +15,7 @@ def chai(message):
 
 def chai_message(message):
     subs_notify(config.chai_subscribers,
-                link_user(message.from_user) + ': ' + ' '.join(message.text.split()[1:]), me=message.from_user.id)
+                link_user(message.from_user) + ': ' + ' '.join(message.text.split(' ')[1:]), me=message.from_user.id)
 
 
 def chai_callback(call):

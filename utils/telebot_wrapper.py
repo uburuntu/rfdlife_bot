@@ -32,6 +32,7 @@ class TelebotWrapper(telebot.TeleBot):
         super().__init__(*args, **kwargs)
         self.name = ''
 
+    @retry((ApiException, requests.exceptions.ConnectionError))
     def init_name(self):
         self.name = '@' + self.get_me().username
 
@@ -46,7 +47,7 @@ class TelebotWrapper(telebot.TeleBot):
         elif isinstance(exc, requests.exceptions.ConnectionError):
             log('Telegram connection exception: {:.100};'.format(str(exc)))
         else:
-            log('Exception: {};'.format(exc))
+            log('Exception: {};'.format(str(exc)))
 
     @retry((ApiException, requests.exceptions.ConnectionError))
     def send_message(self, chat_id, text, disable_web_page_preview=None, reply_to_message_id=None, reply_markup=None,

@@ -36,7 +36,7 @@ def command_start(message):
 
 @my_bot.message_handler(func=commands_handler(['/help']))
 @my_data.command_need_name
-def command_start(message):
+def command_help(message):
     user_action_log(message, 'called ' + message.text)
     with open(config.FileLocation.cmd_help, 'r', encoding='utf-8') as file:
         my_bot.reply_to(message, file.read(), parse_mode='HTML', disable_web_page_preview=True)
@@ -55,7 +55,7 @@ def command_restart(message):
 @my_bot.message_handler(func=commands_handler(['/year', '/month', '/week', '/day']))
 @my_data.command_need_name
 @command_with_delay(delay=1)
-def command_year(message):
+def command_date(message):
     user_action_log(message, 'called ' + message.text)
     my_acs.reply_time(message)
 
@@ -63,7 +63,7 @@ def command_year(message):
 @my_bot.message_handler(func=commands_handler(['/state']))
 @my_data.command_need_name
 @command_with_delay(delay=1)
-def command_day(message):
+def command_state(message):
     user_action_log(message, 'called ' + message.text)
     my_acs.user_state(message)
 
@@ -119,7 +119,7 @@ def command_alert(message):
 @my_bot.message_handler(func=commands_handler(['/birthdays']))
 @my_data.command_need_name
 @command_with_delay(delay=1)
-def command_alert(message):
+def command_birthdays(message):
     user_action_log(message, 'called ' + message.text)
     birthday.birthdays_show(message)
 
@@ -127,7 +127,7 @@ def command_alert(message):
 @my_bot.message_handler(func=commands_handler(['/stats']))
 @my_data.command_need_name
 @command_with_delay(delay=1)
-def command_alert(message):
+def command_stats(message):
     user_action_log(message, 'called ' + message.text)
     stats.stats(message)
 
@@ -135,7 +135,7 @@ def command_alert(message):
 @my_bot.message_handler(func=commands_handler(['/users_stats']))
 @my_data.command_need_name
 @command_with_delay(delay=1)
-def command_alert(message):
+def command_users_stats(message):
     user_action_log(message, 'called ' + message.text)
     stats.users_stats(message)
 
@@ -151,7 +151,7 @@ def command_playroom(message):
 @my_bot.message_handler(func=commands_handler(['/kitchen']))
 @my_data.command_need_name
 @command_with_delay(delay=1)
-def command_playroom(message):
+def command_kitchen(message):
     user_action_log(message, 'called ' + message.text)
     playroom.kitchen_show(message)
 
@@ -166,7 +166,7 @@ def command_camera(message):
 
 @my_bot.message_handler(func=commands_handler(['/donate']))
 @command_with_delay(delay=1)
-def command_alert(message):
+def command_donate(message):
     user_action_log(message, 'called ' + message.text)
     donate.donate(message)
 
@@ -200,7 +200,7 @@ def callback_chai(call):
 
 @my_bot.callback_query_handler(func=lambda call: call.data.startswith('time'))
 @my_data.callback_need_access
-def callback_in_office(call):
+def callback_time(call):
     user_action_log(call, 'callbacked ' + call.data)
     my_acs.reply_time_update(call)
 
@@ -257,7 +257,7 @@ def command_reply(message):
 @my_bot.message_handler(func=commands_handler(['/notify_all']))
 @bot_admin_command
 @command_with_delay(delay=1)
-def command_day(message):
+def command_notify_all(message):
     user_action_log(message, 'called ' + message.text)
     split = message.text.split(' ', 1)
     if len(split) > 1:
@@ -269,9 +269,9 @@ def command_day(message):
 @my_bot.message_handler(func=commands_handler(['/touch_all']))
 @bot_admin_command
 @command_with_delay(delay=1)
-def command_day(message):
+def command_touch_all(message):
     user_action_log(message, 'called ' + message.text)
-    for chat_id in my_data.list_users():
+    for chat_id in config.chai_subscribers:
         try:
             my_bot.send_chat_action(chat_id, action='typing')
         except ApiException as e:
@@ -280,7 +280,7 @@ def command_day(message):
 
 @my_bot.message_handler(func=commands_handler(['/log']))
 @bot_admin_command
-def get_log(message):
+def command_log(message):
     user_action_log(message, 'called ' + message.text)
     with open(config.FileLocation.bot_logs, 'r', encoding='utf-8') as file:
         lines = file.readlines()[-100:]
