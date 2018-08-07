@@ -4,8 +4,6 @@ import time
 
 import requests
 from apscheduler.schedulers.background import BackgroundScheduler
-from telebot import apihelper
-from telebot.apihelper import ApiException
 
 import config
 import tokens
@@ -13,8 +11,8 @@ from utils import birthday, chai, donate, playroom, stats
 from utils.acs_manager import my_acs
 from utils.admin_tools import kill_bot, update_bot
 from utils.common_utils import action_log, bold, bot_admin_command, chai_user_command, check_outdated_callback, \
-    command_with_delay, commands_handler, cut_long_text, global_lock, is_command, link, my_bot, not_command, \
-    subs_notify, user_action_log, my_metrics
+    command_with_delay, commands_handler, cut_long_text, global_lock, is_command, link, my_bot, my_metrics, not_command, \
+    subs_notify, user_action_log
 from utils.data_manager import my_data
 
 
@@ -273,10 +271,7 @@ def command_notify_all(message):
 def command_touch_all(message):
     user_action_log(message, 'called ' + message.text)
     for chat_id in config.chai_subscribers:
-        try:
-            my_bot.send_chat_action(chat_id, action='typing')
-        except ApiException as e:
-            action_log(f'Telegram api exception: {e},\nchat_id={chat_id}')
+        my_bot.send_chat_action(chat_id, action='typing')
 
 
 @my_bot.message_handler(func=commands_handler(['/log']))
@@ -338,10 +333,7 @@ def handle_updates(updates):
 
 if __name__ == '__main__':
     # Настройка глобальных переменных
-    apihelper.proxy = {
-        'http' : 'socks5://telegram:telegram@sr123.spry.fail:1080',
-        'https': 'socks5://telegram:telegram@sr123.spry.fail:1080',
-    }
+    my_bot.set_proxy()
     my_bot.skip_pending = False
     my_bot.set_update_listener(handle_updates)
     action_log('Running bot!')

@@ -3,6 +3,7 @@ from datetime import datetime
 
 import requests
 import telebot
+from telebot import apihelper
 from telebot.apihelper import ApiException
 
 
@@ -18,6 +19,7 @@ def retry(exception, retries_count=5):
                     exc = e
                 else:
                     break
+                TelebotWrapper.set_proxy()
             else:
                 TelebotWrapper.log_exception(exc, *args, **kwargs)
             return ret
@@ -28,6 +30,18 @@ def retry(exception, retries_count=5):
 
 
 class TelebotWrapper(telebot.TeleBot):
+    # Free Telegram proxies from t.me/proxyme and others
+    proxies_list = [
+        'socks5://telegram:telegram@sr123.spry.fail:1080',
+        'socks5://telegram:telegram@k45i6.nimble.zone:1080',
+        'socks5://telegram:telegram@239h4ym.spry.wtf:1080',
+        'socks5://28006241:F1zcUqql@phobos.public.opennetwork.cc:1090',
+        'socks5://28006241:F1zcUqql@deimos.public.opennetwork.cc:1090',
+        'socks5://telegram:telegram@sreju5h4.spry.fail:1080',
+        'socks5://telegram:telegram@rmpufgh1.teletype.live:1080',
+    ]
+    next_proxy = 0
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.name = ''
@@ -35,6 +49,12 @@ class TelebotWrapper(telebot.TeleBot):
     @retry((ApiException, requests.exceptions.ConnectionError))
     def init_name(self):
         self.name = '@' + self.get_me().username
+
+    @staticmethod
+    def set_proxy():
+        apihelper.proxy = {'http' : TelebotWrapper.proxies_list[TelebotWrapper.next_proxy],
+                           'https': TelebotWrapper.proxies_list[TelebotWrapper.next_proxy]}
+        TelebotWrapper.next_proxy = (TelebotWrapper.next_proxy + 1) % len(TelebotWrapper.proxies_list)
 
     @staticmethod
     def log_exception(exc, *args, **kwargs):
