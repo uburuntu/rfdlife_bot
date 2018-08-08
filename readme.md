@@ -1,6 +1,6 @@
 # rfd_life bot
 
-![](https://img.shields.io/badge/Python_Version-3-blue.svg?longCache=true)
+![](https://img.shields.io/badge/Python-⩾3.6-blue.svg?longCache=true)
 
 ## Функциональность
 

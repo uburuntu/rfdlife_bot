@@ -1,5 +1,6 @@
 import functools
 from datetime import datetime
+from urllib.parse import unquote
 
 import requests
 import telebot
@@ -39,6 +40,8 @@ class TelebotWrapper(telebot.TeleBot):
         'socks5://28006241:F1zcUqql@deimos.public.opennetwork.cc:1090',
         'socks5://telegram:telegram@sreju5h4.spry.fail:1080',
         'socks5://telegram:telegram@rmpufgh1.teletype.live:1080',
+        'socks5://user_2JpM:uwJeUn7jHMUdtinF@s2.shadowsocks.wtf:6685',
+        'socks5://antimalware:eL2S5JbU@148.251.151.141:1080',
     ]
     next_proxy = 0
 
@@ -46,7 +49,6 @@ class TelebotWrapper(telebot.TeleBot):
         super().__init__(*args, **kwargs)
         self.name = ''
 
-    @retry((ApiException, requests.exceptions.ConnectionError))
     def init_name(self):
         self.name = '@' + self.get_me().username
 
@@ -65,7 +67,7 @@ class TelebotWrapper(telebot.TeleBot):
         if isinstance(exc, ApiException):
             log('Telegram api exception: function {}; result {};'.format(exc.function_name, exc.result))
         elif isinstance(exc, requests.exceptions.ConnectionError):
-            log('Telegram connection exception: {:.100};'.format(str(exc)))
+            log('Telegram connection exception at: {}'.format(unquote(exc.request.path_url).split('/')[-1]))
         else:
             log('Exception: {};'.format(str(exc)))
 
