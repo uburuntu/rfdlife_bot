@@ -1,6 +1,8 @@
 apscheduler>=3.3.1
 beautifulsoup4>=4.6.0
 numpy>=1.13
+pandas>=0.23.4
+dateutil>=2.7.3
 opencv-python>=3.4.0
 PySocks>=1.6.7
 pyTelegramBotAPI>=3.6.5
