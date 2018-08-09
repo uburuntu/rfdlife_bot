@@ -82,7 +82,7 @@ class DataManager:
             user_action_log(message, 'successfully registered')
             my_bot.reply_to(message, '✅ Пароль верный!')
             subs_notify(config.admin_ids, '✨ Новый пользователь: {}'.format(link_user(message.from_user)))
-            my_data.data[str(message.from_user.id)]['who'] = user_name(message.from_user)
+            self.data[str(message.from_user.id)]['who'] = user_name(message.from_user)
             self.register_user(message)
         else:
             user_action_log(message, 'entered wrong password')
@@ -109,7 +109,7 @@ class DataManager:
             my_bot.send_message(message.from_user.id, '⚠️ Ошибка, нужно указать номер')
 
     def register_user_finish(self, message):
-        my_data.data[str(message.from_user.id)]['settings'] = UserSettings()
+        self.data[str(message.from_user.id)]['settings'] = UserSettings()
         self.save()
         my_bot.reply_to(message, '✅ Данные сохранены', parse_mode='HTML', disable_web_page_preview=True)
         with open(config.FileLocation.cmd_help, 'r', encoding='utf-8') as file:
