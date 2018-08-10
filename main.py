@@ -317,6 +317,7 @@ def admin_tools(message):
 
 
 @my_bot.message_handler(func=not_command())
+@my_data.command_need_name
 # @chai_user_command
 def chai_chat(message):
     message.text = '/ch ' + message.text
