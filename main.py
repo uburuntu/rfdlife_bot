@@ -7,7 +7,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 import config
 import tokens
-from utils import birthday, chai, donate, playroom, stats
+from utils import birthday, chai, donate, playroom, stats, vacation
 from utils.acs_manager import my_acs
 from utils.admin_tools import kill_bot, update_bot
 from utils.common_utils import action_log, bold, bot_admin_command, chai_user_command, check_outdated_callback, \
@@ -80,7 +80,7 @@ def command_in_office(message):
 @command_with_delay(delay=1)
 def command_in_office(message):
     user_action_log(message, 'called ' + message.text)
-    my_acs.on_vacation_now(message)
+    vacation.on_vacation_now(message)
 
 
 @my_bot.message_handler(func=commands_handler(['/chai']))

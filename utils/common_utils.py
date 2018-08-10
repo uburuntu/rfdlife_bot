@@ -308,6 +308,13 @@ def bold(text, mode='html'):
         return '*{}*'.format(text)
 
 
+def code(text, mode='html'):
+    if mode.lower() == 'html':
+        return '<code>{}</code>'.format(text)
+    if mode.lower() == 'markdown':
+        return '`{}`'.format(text)
+
+
 def link(text, user_id, mode='html'):
     if mode.lower() == 'html':
         return '<a href=\'tg://user?id={0}\'>{1}</a>'.format(user_id, text)
