@@ -74,12 +74,14 @@ def command_in_office(message):
     user_action_log(message, 'called ' + message.text)
     my_acs.in_office_now(message)
 
+
 @my_bot.message_handler(func=commands_handler(['/vacation']))
 @my_data.command_need_name
 @command_with_delay(delay=1)
 def command_in_office(message):
     user_action_log(message, 'called ' + message.text)
     my_acs.on_vacation_now(message)
+
 
 @my_bot.message_handler(func=commands_handler(['/chai']))
 @chai_user_command

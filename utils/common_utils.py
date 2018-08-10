@@ -86,7 +86,7 @@ def russian_month_name(month, is_uppercase_starting, is_nominative):
         return ""
     name = list(name)
     if is_uppercase_starting:
-        name[0] = name[0].upper ()
+        name[0] = name[0].upper()
     if not is_nominative:
         if month == 3 or month == 8:
             name.append('a')
