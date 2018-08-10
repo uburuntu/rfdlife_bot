@@ -56,6 +56,45 @@ def curr_time():
     return datetime.now().strftime('%d/%m/%Y %H:%M:%S')
 
 
+def russian_month_name(month, is_uppercase_starting, is_nominative):
+    name = ""
+    if month == 1:
+        name = "январь"
+    elif month == 2:
+        name = "февраль"
+    elif month == 3:
+        name = "март"
+    elif month == 4:
+        name = "апрель"
+    elif month == 5:
+        name = "май"
+    elif month == 6:
+        name = "июнь"
+    elif month == 7:
+        name = "июль"
+    elif month == 8:
+        name = "август"
+    elif month == 9:
+        name = "сентябрь"
+    elif month == 10:
+        name = "октябрь"
+    elif month == 11:
+        name = "ноябрь"
+    elif month == 12:
+        name = "декабрь"
+    else:
+        return ""
+    name = list(name)
+    if is_uppercase_starting:
+        name[0] = name[0].upper ()
+    if not is_nominative:
+        if month == 3 or month == 8:
+            name.append('a')
+        else:
+            name[-1] = 'я'
+    return "".join(name)
+
+
 def action_log(text):
     print('{}\n{}\n'.format(curr_time(), text))
 
