@@ -17,7 +17,7 @@ class CamerasView:
     def show_camera(self):
         capture = cv2.VideoCapture(self.get_stream_link())
         while True:
-            ret, frame = capture.read()
+            _, frame = capture.read()
             cv2.imshow('Camera', frame)
             if cv2.waitKey(1) == 27:
                 exit(0)

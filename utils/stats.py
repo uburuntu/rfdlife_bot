@@ -13,7 +13,7 @@ def stats(message):
     users_count = len(my_data.list_users())
     alerts_count = 0
 
-    for chat_id, user in my_data.data.items():
+    for user in my_data.data.values():
         alerts_count += len(user.get('alert_users', []))
 
     with open(config.FileLocation.bot_logs, 'r', encoding='utf-8') as file:

@@ -78,7 +78,7 @@ def command_in_office(message):
 @my_bot.message_handler(func=commands_handler(['/vacation']))
 @my_data.command_need_name
 @command_with_delay(delay=1)
-def command_in_office(message):
+def command_vacation(message):
     user_action_log(message, 'called ' + message.text)
     vacation.on_vacation_now(message)
 

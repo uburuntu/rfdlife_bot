@@ -50,27 +50,21 @@ class AppMetrica:
         return data
 
     def track(self, update):
-        try:
-            # API Manual: tech.yandex.ru/appmetrica/doc/mobile-api/post/post-import-events-docpage/
-            data = self.dict_from_update(update)
-            event_name = data.get('bot_command', 'text')
+        # API Manual: tech.yandex.ru/appmetrica/doc/mobile-api/post/post-import-events-docpage/
+        data = self.dict_from_update(update)
+        event_name = data.get('bot_command', 'text')
 
-            payload = (
-                # Required fields
-                ('post_api_key', self.appmetrica_token),
-                ('application_id', self.application_id),
-                ('event_name', event_name),
-                ('event_timestamp', data['date']),
-                # Optional fields
-                ('profile_id', data['from']['id']),
-                ('device_locale', data['from'].get('language_code', '')),
-                ('event_json', json.dumps(data, ensure_ascii=False)),
-            )
+        payload = (
+            # Required fields
+            ('post_api_key', self.appmetrica_token),
+            ('application_id', self.application_id),
+            ('event_name', event_name),
+            ('event_timestamp', data['date']),
+            # Optional fields
+            ('profile_id', data['from']['id']),
+            ('device_locale', data['from'].get('language_code', '')),
+            ('event_json', json.dumps(data, ensure_ascii=False)),
+        )
 
-            r = requests.post(self.POST_API_URL, params=payload)
-            return r.ok
-        except requests.exceptions.Timeout:
-            # set up for a retry, or continue in a retry loop
-            return False
-        except (requests.exceptions.RequestException, ValueError) as e:
-            return False
+        r = requests.post(self.POST_API_URL, params=payload)
+        return r.ok

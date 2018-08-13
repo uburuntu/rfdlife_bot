@@ -13,7 +13,7 @@ def retry(exception, retries_count=5):
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
             ret, exc = None, None
-            for attempt in range(retries_count):
+            for _ in range(retries_count):
                 try:
                     ret = func(*args, **kwargs)
                 except exception as e:
