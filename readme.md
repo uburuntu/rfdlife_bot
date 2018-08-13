@@ -1,6 +1,8 @@
 # rfd_life bot
 
-![](https://img.shields.io/badge/Python-⩾3.6-blue.svg?longCache=true)
+[![Python ⩾ 3.6](https://img.shields.io/badge/Python-⩾3.6-blue.svg?longCache=true)]()
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/42663af2923c4399ad3a2ef9ce8273ba)](https://app.codacy.com/app/bekbulatov.ramzan/rfdlife_bot?utm_source=github.com&utm_medium=referral&utm_content=uburuntu/rfdlife_bot&utm_campaign=badger)
+[![Known Vulnerabilities](https://snyk.io/test/github/uburuntu/rfdlife_bot/badge.svg?targetFile=requirements.txt)](https://snyk.io/test/github/uburuntu/rfdlife_bot?targetFile=requirements.txt)
 
 ## Функциональность
 
