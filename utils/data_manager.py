@@ -114,6 +114,7 @@ class DataManager:
         my_bot.reply_to(message, '✅ Данные сохранены', parse_mode='HTML', disable_web_page_preview=True)
         with open(config.FileLocation.cmd_help, 'r', encoding='utf-8') as file:
             my_bot.send_message(message.from_user.id, file.read(), parse_mode='HTML', disable_web_page_preview=True)
+        quit(0)
 
     def list_users(self, for_what=None):
         all_users = self.data.keys()
