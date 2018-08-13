@@ -56,6 +56,7 @@ pip3 install -r requirements.txt
 
 ## Связанные сервисы
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/42663af2923c4399ad3a2ef9ce8273ba)](https://app.codacy.com/app/bekbulatov.ramzan/rfdlife_bot?utm_source=github.com&utm_medium=referral&utm_content=uburuntu/rfdlife_bot&utm_campaign=badger)
 [![](https://img.shields.io/badge/VK-rfd__life-blue.svg)](https://vk.com/rfd_life)
 
 ## Контакты
