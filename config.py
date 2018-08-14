@@ -1,21 +1,25 @@
+from os.path import join
+
+
 # Пути к папкам и файлам
 class FileLocation:
     data_dir = 'data/'
     text_dir = data_dir
 
-    cmd_start = text_dir + 'cmd_start.html'
-    cmd_help = text_dir + 'cmd_help.html'
-    cmd_help_admin = text_dir + 'cmd_help_admin.html'
-    acs_answer = text_dir + 'acs_answer.html'
-    acs_state_answer = text_dir + 'acs_state_answer.html'
+    cmd_start = join(text_dir, 'cmd_start.html')
+    cmd_help = join(text_dir, 'cmd_help.html')
+    cmd_help_admin = join(text_dir, 'cmd_help_admin.html')
+    acs_answer = join(text_dir, 'acs_answer.html')
+    acs_state_answer = join(text_dir, 'acs_state_answer.html')
 
-    camera_error = data_dir + 'camera_error.jpg'
+    camera_error = join(data_dir, 'camera_error.jpg')
 
     gen_dir = 'gen/'
+    camera_dir = join(gen_dir, 'cameras/')
 
-    bot_logs = gen_dir + 'bot_logs.txt'
-    bot_killed = gen_dir + 'they_killed_me.txt'
-    user_data = gen_dir + 'user_data.json'
+    bot_logs = join(gen_dir, 'bot_logs.txt')
+    bot_killed = join(gen_dir, 'they_killed_me.txt')
+    user_data = join(gen_dir, 'user_data.json')
 
 
 chai_subscribers = [28006241,  # rmbk

@@ -4,7 +4,8 @@ from datetime import datetime, timedelta
 
 import numpy
 import requests
-from telebot import types
+from telebot.types import InlineKeyboardMarkup
+from telebot.types import InlineKeyboardButton as Button
 
 import config
 import tokens
@@ -22,8 +23,8 @@ class AcsManager:
 
         self.asc_unaccessible_error = 'Сервер СКД сейчас недоступен :('
 
-        self.keyboard = types.InlineKeyboardMarkup()
-        self.keyboard.add(types.InlineKeyboardButton(text='🔄', callback_data='in_office_update'))
+        self.keyboard = InlineKeyboardMarkup()
+        self.keyboard.add(Button(text='🔄', callback_data='in_office_update'))
 
     @staticmethod
     def time_format(time):
@@ -96,13 +97,10 @@ class AcsManager:
             return 'Иногда нужно остановиться и насладиться текущим моментом 🦄', None
 
         prev, next = beg - timedelta(days=1), end + timedelta(days=1)
-        keyboard = types.InlineKeyboardMarkup()
-        keyboard.add(
-                types.InlineKeyboardButton(text='⬅️',
-                                           callback_data='time_{}_{}'.format(cmd, prev.strftime('%d/%m/%Y'))),
-                types.InlineKeyboardButton(text='🔄', callback_data='time_{}_{}'.format(cmd, day.strftime('%d/%m/%Y'))),
-                types.InlineKeyboardButton(text='➡️',
-                                           callback_data='time_{}_{}'.format(cmd, next.strftime('%d/%m/%Y'))))
+        keyboard = InlineKeyboardMarkup()
+        keyboard.add(Button(text='⬅️', callback_data='time_{}_{}'.format(cmd, prev.strftime('%d/%m/%Y'))),
+                     Button(text='🔄', callback_data='time_{}_{}'.format(cmd, day.strftime('%d/%m/%Y'))),
+                     Button(text='➡️', callback_data='time_{}_{}'.format(cmd, next.strftime('%d/%m/%Y'))))
         return self._make_time_request(user_id, beg, end), keyboard
 
     def reply_time_update(self, call):
@@ -111,8 +109,7 @@ class AcsManager:
         day = datetime.strptime(split[2], '%d/%m/%Y')
         text, keyboard = self.reply_time_data(call.from_user.id, cmd, day)
         my_bot.answer_callback_query(callback_query_id=call.id, show_alert=False, text='✅  Сообщение обновлено')
-        my_bot.edit_message_text(text,
-                                 chat_id=call.message.chat.id, message_id=call.message.message_id,
+        my_bot.edit_message_text(text, chat_id=call.message.chat.id, message_id=call.message.message_id,
                                  reply_markup=keyboard, parse_mode='HTML')
 
     def reply_time(self, message):

@@ -1,26 +1,24 @@
+import os
+
 import cv2
+from telebot.types import InlineKeyboardButton as Button, InlineKeyboardMarkup, InputMediaPhoto
 
 import config
-from utils.common_utils import curr_time, my_bot
+from utils.common_utils import code, curr_time, my_bot
 
 
-class CamerasView:
+class CameraView:
+    def __init__(self, camera_num):
+        self.camera_num = camera_num
+
     def get_stream_link(self):
-        return NotImplemented
+        return 'http://video.local.rfdyn.ru:10090/video{}.mjpg'.format(str(self.camera_num))
 
     def get_file_name(self):
-        return config.FileLocation.gen_dir + self.__class__.__name__ + '.jpg'
+        return os.path.join(config.FileLocation.camera_dir, 'camera_' + str(self.camera_num) + '.jpg')
 
     def get_file_name_orig(self):
-        return config.FileLocation.gen_dir + self.__class__.__name__ + '_orig.jpg'
-
-    def show_camera(self):
-        capture = cv2.VideoCapture(self.get_stream_link())
-        while True:
-            _, frame = capture.read()
-            cv2.imshow('Camera', frame)
-            if cv2.waitKey(1) == 27:
-                exit(0)
+        return os.path.join(config.FileLocation.camera_dir, 'camera_' + str(self.camera_num) + '_orig.jpg')
 
     def create_frame(self):
         capture = cv2.VideoCapture(self.get_stream_link())
@@ -30,6 +28,11 @@ class CamerasView:
         capture.release()
         return ret
 
+    def draw_info(self):
+        frame = cv2.imread(self.get_file_name_orig())
+        cv2.putText(frame, curr_time(), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, 255, 1)
+        cv2.imwrite(self.get_file_name(), frame)
+
     def get_image(self):
         ret = self.create_frame()
         if ret:
@@ -37,52 +40,47 @@ class CamerasView:
             return self.get_file_name()
         return config.FileLocation.camera_error
 
-    def draw_info(self):
-        frame = cv2.imread(self.get_file_name_orig())
-        text = curr_time()
-        cv2.putText(frame, text, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, 255, 1)
-        cv2.imwrite(self.get_file_name(), frame)
+
+def camera_keyboard(camera_num):
+    def border(num):
+        return 12 if num < 4 else 4 if num > 12 else num
+
+    keyboard = InlineKeyboardMarkup()
+    keyboard.add(Button(text='⬅️', callback_data='camera_{}'.format(border(camera_num - 1))),
+                 Button(text='🔄', callback_data='camera_{}'.format(camera_num)),
+                 Button(text='➡️', callback_data='camera_{}'.format(border(camera_num + 1))))
+    return keyboard
 
 
-class PlayroomView(CamerasView):
-    def get_stream_link(self):
-        return 'http://video.local.rfdyn.ru:10090/video10.mjpg'
-
-
-class KitchenView(CamerasView):
-    def get_stream_link(self):
-        return 'http://video.local.rfdyn.ru:10090/video8.mjpg'
-
-
-class CameraNView(CamerasView):
-    def __init__(self, n='10'):
-        super().__init__()
-        if n.isdigit():
-            self.n = n
-        else:
-            self.n = 10
-
-    def get_stream_link(self):
-        return f'http://video.local.rfdyn.ru:10090/video{self.n}.mjpg'
+def camera_show(message, camera_num):
+    my_bot.send_chat_action(message.chat.id, 'upload_photo')
+    with open(CameraView(camera_num).get_image(), 'rb') as img:
+        my_bot.send_photo(message.chat.id, img, caption=f'Камера #{camera_num}',
+                          reply_markup=camera_keyboard(camera_num), reply_to_message_id=message.message_id)
 
 
 def playroom_show(message):
-    my_bot.send_chat_action(message.chat.id, 'upload_photo')
-    with open(PlayroomView().get_image(), 'rb') as img:
-        my_bot.send_photo(message.chat.id, img, caption='', reply_to_message_id=message.message_id)
+    camera_show(message, 10)
 
 
 def kitchen_show(message):
-    my_bot.send_chat_action(message.chat.id, 'upload_photo')
-    with open(KitchenView().get_image(), 'rb') as img:
-        my_bot.send_photo(message.chat.id, img, caption='', reply_to_message_id=message.message_id)
+    camera_show(message, 8)
 
 
 def camera_n_show(message):
-    my_bot.send_chat_action(message.chat.id, 'upload_photo')
-    with open(CameraNView(message.text.split()[-1]).get_image(), 'rb') as img:
-        my_bot.send_photo(message.chat.id, img, caption='', reply_to_message_id=message.message_id)
+    split = message.text.split()
+    if len(split) == 2 and split[1].isdigit():
+        camera_show(message, int(split[1]))
+    else:
+        my_bot.reply_to(message, ('Использование: {}, N=4..12').format(code('/camera [N]')))
 
 
-if __name__ == '__main__':
-    PlayroomView().show_camera()
+def update_camera(call):
+    message = call.message
+    camera_num = int(call.data.replace('camera_', ''))
+
+    with open(CameraView(camera_num).get_image(), 'rb') as img:
+        my_bot.edit_message_media(chat_id=message.chat.id, message_id=message.message_id,
+                                  media=InputMediaPhoto(img, caption=f'Камера #{camera_num}'),
+                                  reply_markup=camera_keyboard(camera_num))
+        my_bot.answer_callback_query(callback_query_id=call.id, show_alert=False, text='✅  Обновлено')

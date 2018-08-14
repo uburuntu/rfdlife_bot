@@ -219,6 +219,13 @@ def callback_in_office(call):
     my_acs.in_office_update(call)
 
 
+@my_bot.callback_query_handler(func=lambda call: call.data.startswith('camera'))
+@my_data.callback_need_access
+def callback_camera(call):
+    user_action_log(call, 'callbacked ' + call.data)
+    playroom.update_camera(call)
+
+
 @my_bot.callback_query_handler(func=lambda call: call.data.startswith('settings'))
 @check_outdated_callback(delay=15 * 60, cmd='/settings')
 @my_data.callback_need_access
