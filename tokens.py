@@ -32,8 +32,8 @@ access_pswd = os.getenv('RFDLIFE_BOT_ACCESS_PSWD', default_access_pswd)
 default_provider_token = ''
 provider_token = os.getenv('RFDLIFE_BOT_PROVIDER_TOKEN', default_provider_token)
 
-default_appmetrica_token = ''
-appmetrica_token = os.getenv('RFDLIFE_BOT_APPMETRICA_TOKEN', default_appmetrica_token)
+default_chatbase_token = ''
+chatbase_token = os.getenv('RFDLIFE_BOT_CHATBASE_TOKEN', default_chatbase_token)
 
 default_dumping_channel = ''
 dumping_channel_id = os.getenv('RFDLIFE_BOT_DUMPING_CHANNEL', default_dumping_channel)

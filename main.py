@@ -11,8 +11,8 @@ from utils import birthday, chai, donate, playroom, stats, vacation
 from utils.acs_manager import my_acs
 from utils.admin_tools import kill_bot, update_bot
 from utils.common_utils import action_log, bold, bot_admin_command, chai_user_command, check_outdated_callback, \
-    command_with_delay, commands_handler, cut_long_text, global_lock, is_command, link, my_bot, my_metrics, not_command, \
-    subs_notify, user_action_log
+    command_with_delay, commands_handler, cut_long_text, global_lock, is_command, link, my_analytics, my_bot, \
+    not_command, subs_notify, user_action_log
 from utils.data_manager import my_data
 
 
@@ -335,9 +335,11 @@ def chai_chat(message):
 
 # All updates handler
 def handle_updates(updates):
-    if tokens.appmetrica_token != '':
+    if tokens.chatbase_token != '':
         for update in updates:
-            my_metrics.track(update)
+            ret = my_analytics.track(update)
+            if not ret.ok:
+                action_log(ret.text)
 
 
 if __name__ == '__main__':

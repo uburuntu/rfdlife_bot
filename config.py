@@ -18,8 +18,6 @@ class FileLocation:
     user_data = gen_dir + 'user_data.json'
 
 
-appmetrica_app_id = 1542608
-
 chai_subscribers = [28006241,  # rmbk
                     155094831,  # mix
                     78179118,  # tester

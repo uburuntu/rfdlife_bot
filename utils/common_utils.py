@@ -6,11 +6,11 @@ from os import path
 
 import config
 import tokens
-from utils.appmetrica import AppMetrica
+from utils.bot_analytics import BotAnalytics
 from utils.telebot_wrapper import TelebotWrapper
 
 my_bot = TelebotWrapper(tokens.bot, threaded=False)
-my_metrics = AppMetrica(appmetrica_token=tokens.appmetrica_token, application_id=config.appmetrica_app_id)
+my_analytics = BotAnalytics(api_key=tokens.chatbase_token)
 
 global_lock = threading.Lock()
 

@@ -5,7 +5,7 @@ from dateutil.relativedelta import relativedelta
 from pandas import DataFrame, read_html
 
 import tokens
-from utils.common_utils import TimeMemoize, my_bot, bold, code
+from utils.common_utils import TimeMemoize, bold, code, my_bot
 
 
 def _make_vacation_request(date):
@@ -37,7 +37,7 @@ def _find_vacation_end(calendar_table, user_id, start):
 
 @TimeMemoize(delay=15 * 60 + 42)
 def _on_vacation_get(date):
-    curr_month_date = datetime.date(date)
+    curr_month_date = date
     next_month_date = curr_month_date + relativedelta(months=1)
 
     curr_month_table = _make_vacation_request(curr_month_date)
@@ -64,7 +64,7 @@ def _on_vacation_get(date):
 
 
 def on_vacation_now(message):
-    vacations = _on_vacation_get(datetime.today())
+    vacations = _on_vacation_get(datetime.date(datetime.today()))
     if vacations:
         text = '🌴 {}:\n'.format(bold('Сейчас в отпуске'))
         for item in vacations:
