@@ -56,45 +56,6 @@ def curr_time():
     return datetime.now().strftime('%d/%m/%Y %H:%M:%S')
 
 
-def russian_month_name(month, is_uppercase_starting, is_nominative):
-    name = ""
-    if month == 1:
-        name = "январь"
-    elif month == 2:
-        name = "февраль"
-    elif month == 3:
-        name = "март"
-    elif month == 4:
-        name = "апрель"
-    elif month == 5:
-        name = "май"
-    elif month == 6:
-        name = "июнь"
-    elif month == 7:
-        name = "июль"
-    elif month == 8:
-        name = "август"
-    elif month == 9:
-        name = "сентябрь"
-    elif month == 10:
-        name = "октябрь"
-    elif month == 11:
-        name = "ноябрь"
-    elif month == 12:
-        name = "декабрь"
-    else:
-        return ""
-    name = list(name)
-    if is_uppercase_starting:
-        name[0] = name[0].upper()
-    if not is_nominative:
-        if month == 3 or month == 8:
-            name.append('a')
-        else:
-            name[-1] = 'я'
-    return "".join(name)
-
-
 def action_log(text):
     print('{}\n{}\n'.format(curr_time(), text))
 
@@ -217,6 +178,19 @@ def send_file(chat_id, file_name, **kwargs):
     if is_non_zero_file(file_name):
         with open(file_name, 'r', encoding='utf-8') as file:
             return my_bot.send_document(chat_id, file, **kwargs)
+
+
+def russian_month_name(month, is_nominative=False, is_uppercase_starting=False):
+    months_nom = ['январь', 'февраль', 'март', 'апрель',
+                  'май', 'июнь', 'июль', 'август',
+                  'сентябрь', 'октябрь', 'ноябрь', 'декабрь']
+
+    months_gen = ['января', 'февраля', 'марта', 'апреля',
+                  'мая', 'июня', 'июля', 'августа',
+                  'сентября', 'октября', 'ноября', 'декабря']
+
+    months = months_nom if is_nominative else months_gen
+    return months[month].title() if is_uppercase_starting else months[month]
 
 
 class TimeMemoize(object):
