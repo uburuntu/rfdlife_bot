@@ -9,7 +9,7 @@ from telebot.apihelper import ApiException
 
 
 def retry(exception, retries_count=5):
-    def my_decorator(func):
+    def decorator(func):
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
             ret, exc = None, None
@@ -27,7 +27,7 @@ def retry(exception, retries_count=5):
 
         return wrapped
 
-    return my_decorator
+    return decorator
 
 
 class TelebotWrapper(telebot.TeleBot):

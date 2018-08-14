@@ -86,7 +86,7 @@ def not_command():
 
 
 def command_with_delay(delay=10):
-    def my_decorator(func):
+    def decorator(func):
         def wrapped(message):
             now = datetime.now().timestamp()
             diff = now - func.last_call if hasattr(func, 'last_call') else now
@@ -99,7 +99,7 @@ def command_with_delay(delay=10):
 
         return wrapped
 
-    return my_decorator
+    return decorator
 
 
 def bot_admin_command(func):
@@ -121,7 +121,7 @@ def chai_user_command(func):
 
 
 def skip_exception(exception):
-    def my_decorator(func):
+    def decorator(func):
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
             try:
@@ -131,11 +131,11 @@ def skip_exception(exception):
 
         return wrapped
 
-    return my_decorator
+    return decorator
 
 
 def check_outdated_callback(delay, cmd):
-    def my_decorator(func):
+    def decorator(func):
         def wrapped(call):
             message = call.message
             if datetime.now().timestamp() - message.date > delay:
@@ -148,7 +148,7 @@ def check_outdated_callback(delay, cmd):
 
         return wrapped
 
-    return my_decorator
+    return decorator
 
 
 def is_non_zero_file(file_path):

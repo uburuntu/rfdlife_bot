@@ -6,7 +6,7 @@ import requests
 
 import tokens
 from utils.acs_manager import my_acs
-from utils.common_utils import action_log, my_bot, skip_exception, subs_notify
+from utils.common_utils import action_log, code, my_bot, skip_exception, subs_notify
 from utils.data_manager import my_data
 
 happy_emoji = ['🔥', '✨', '🎂', '🍰', '🎉', '🎊', '🎁', '🎈']
@@ -44,10 +44,10 @@ def birthday_check():
 
     for date, name in drs:
         if date == today:
-            names += '{} <code>{}</code>\n'.format(random.choice(happy_emoji), name)
+            names += '{} {}\n'.format(random.choice(happy_emoji), code(name))
 
     if len(names) > 0:
-        text = 'Сегодня день рождения у:\n\n{}'.format(names)
+        text = 'Сегодня день рождения {}:\n\n{}'.format(names, 'отмечает' if len(names) == 1 else 'отмечают')
         subs_notify(my_data.list_users(for_what='morning_birthdays'), text)
 
 
@@ -60,6 +60,6 @@ def birthdays_show(message):
     text = 'Ближайшие дни рождения {}:\n\n'.format(random.choice(happy_emoji))
 
     for date, name in drs:
-        text += '{} — <code>{}</code>\n'.format(date, name)
+        text += '{} — {}\n'.format(date, code(name))
 
     my_bot.reply_to(message, text, parse_mode='HTML')

@@ -4,8 +4,7 @@ from datetime import datetime, timedelta
 
 import numpy
 import requests
-from telebot.types import InlineKeyboardMarkup
-from telebot.types import InlineKeyboardButton as Button
+from telebot.types import InlineKeyboardButton as Button, InlineKeyboardMarkup
 
 import config
 import tokens

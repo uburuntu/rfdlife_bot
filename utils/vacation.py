@@ -68,7 +68,7 @@ def on_vacation_now(message):
     if vacations:
         text = '🌴 {}:\n'.format(bold('Сейчас в отпуске'))
         for item in vacations:
-            text += '{} — до {}\n'.format(code(item[0]), item[1].strftime('%d/%m'))
+            text += '{} — до {}\n'.format(code(item[0]), item[1].strftime('%d.%m'))
     else:
         text = '💻️ Сейчас нет сотрудников в отпуске!\n'
 

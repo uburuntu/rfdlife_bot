@@ -12,7 +12,7 @@ from utils.settings import UserSettings
 class DataManager:
     def __init__(self, file_name=config.FileLocation.user_data):
         self.file_name = file_name
-        self.data = dict()
+        self.data = {}
         self.load()
 
         self.asc_link = '<a href=\'https://corp.rfdyn.ru/index.php/acs-tabel-intermediadate/\'>СКД</a>'
@@ -55,7 +55,7 @@ class DataManager:
     def callback_need_access(self, func):
         def wrapped(call):
             if not self.is_registered(call) or not self.is_name_set(call):
-                user_action_log(call, 'not registered to callback')
+                user_action_log(call, 'not registered to callback: ' + call.data)
                 my_bot.answer_callback_query(callback_query_id=call.id, show_alert=False, text='⛔️ Нет доступа')
                 return
             return func(call)
