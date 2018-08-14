@@ -275,9 +275,21 @@ def command_notify_all(message):
     user_action_log(message, 'called ' + message.text)
     split = message.text.split(' ', 1)
     if len(split) > 1:
-        subs_notify(my_data.list_users(), '{}\n\n{}'.format(bold('Оповещение пользователей бота'), split[1]))
+        subs_notify(my_data.list_users(), '{}\n\n{}'.format(bold('Оповещение пользователей бота'), split[1]),
+                    me=message.from_user.id)
+
     else:
         my_bot.reply_to(message, 'Использование: /notify_all [ваше сообщение]')
+
+
+@my_bot.message_handler(func=commands_handler(['/notify_all_test']))
+@bot_admin_command
+@command_with_delay(delay=1)
+def command_notify_all_test(message):
+    user_action_log(message, 'called ' + message.text)
+    split = message.text.split(' ', 1)
+    if len(split) > 1:
+        subs_notify([message.from_user.id], '{}\n\n{}'.format(bold('Оповещение пользователей бота'), split[1]))
 
 
 @my_bot.message_handler(func=commands_handler(['/touch_all']))

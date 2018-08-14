@@ -304,9 +304,14 @@ def link_user(user, mode='html'):
 
 
 def subs_notify(subs, text, keyboard=None, me=None):
+    fails = []
     for chat_id in subs:
         if chat_id != me:
             ret = my_bot.send_message(chat_id, text, parse_mode='HTML', reply_markup=keyboard)
-            if not ret and me:
-                my_bot.send_message(me, '⚠️ Сообщение {} не доставилось'.format(link('адресату', chat_id)),
-                                    parse_mode='HTML')
+            if not ret:
+                fails.append(str(chat_id))
+                if me:
+                    my_bot.send_message(me, '⚠️ Сообщение {} не доставилось'.format(link('адресату', chat_id)),
+                                        parse_mode='HTML')
+    if len(fails) != 0:
+        action_log('Notifying failed for: [{}]'.format(', '.join(fails)))
