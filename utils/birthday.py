@@ -47,7 +47,7 @@ def birthday_check():
             names += '{} {}\n'.format(random.choice(happy_emoji), code(name))
 
     if len(names) > 0:
-        text = 'Сегодня день рождения {}:\n\n{}'.format(names, 'отмечает' if len(names) == 1 else 'отмечают')
+        text = 'Сегодня день рождения {}:\n\n{}'.format('отмечает' if names.count('\n') == 1 else 'отмечают', names)
         subs_notify(my_data.list_users(for_what='morning_birthdays'), text)
 
 
