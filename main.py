@@ -307,7 +307,7 @@ def command_notify_all_test(message):
 @command_with_delay(delay=1)
 def command_touch_all(message):
     user_action_log(message, 'called ' + message.text)
-    for chat_id in config.chai_subscribers:
+    for chat_id in my_data.list_users():
         my_bot.send_chat_action(chat_id, action='typing')
 
 
