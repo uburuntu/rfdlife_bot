@@ -22,7 +22,7 @@ def retry(exception, retries_count=5):
                     break
                 TelebotWrapper.set_proxy()
             else:
-                TelebotWrapper.log_exception(exc, *args, **kwargs)
+                TelebotWrapper.log_exception(exc)
             return ret
 
         return wrapped
@@ -59,7 +59,7 @@ class TelebotWrapper(telebot.TeleBot):
         TelebotWrapper.next_proxy = (TelebotWrapper.next_proxy + 1) % len(TelebotWrapper.proxies_list)
 
     @staticmethod
-    def log_exception(exc, *args, **kwargs):
+    def log_exception(exc):
         def log(text):
             curr_time = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
             print('{}\n{}\n'.format(curr_time, text))
