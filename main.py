@@ -202,6 +202,8 @@ def got_payment(message):
 @my_data.callback_need_access
 def callback_chai(call):
     user_action_log(call, 'callbacked ' + call.data)
+    if tokens.chatbase_token != '':
+        my_analytics.track_callback(call)
     chai.chai_callback(call)
 
 
@@ -209,6 +211,8 @@ def callback_chai(call):
 @my_data.callback_need_access
 def callback_time(call):
     user_action_log(call, 'callbacked ' + call.data)
+    if tokens.chatbase_token != '':
+        my_analytics.track_callback(call)
     my_acs.reply_time_update(call)
 
 
@@ -216,6 +220,8 @@ def callback_time(call):
 @my_data.callback_need_access
 def callback_in_office(call):
     user_action_log(call, 'callbacked ' + call.data)
+    if tokens.chatbase_token != '':
+        my_analytics.track_callback(call)
     my_acs.in_office_update(call)
 
 
@@ -223,6 +229,8 @@ def callback_in_office(call):
 @my_data.callback_need_access
 def callback_camera(call):
     user_action_log(call, 'callbacked ' + call.data)
+    if tokens.chatbase_token != '':
+        my_analytics.track_callback(call)
     playroom.update_camera(call)
 
 
@@ -231,6 +239,8 @@ def callback_camera(call):
 @my_data.callback_need_access
 def callback_settings(call):
     user_action_log(call, 'callbacked ' + call.data)
+    if tokens.chatbase_token != '':
+        my_analytics.track_callback(call)
     my_data.get_user_settings(call.from_user.id).settings_update(call)
     my_data.save()
 
@@ -356,7 +366,7 @@ def chai_chat(message):
 def handle_updates(updates):
     if tokens.chatbase_token != '':
         for update in updates:
-            ret = my_analytics.track(update)
+            ret = my_analytics.track_message(update)
             if not ret.ok:
                 action_log(ret.text)
 

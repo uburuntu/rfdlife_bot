@@ -1,4 +1,5 @@
 import json
+import time
 
 import requests
 
@@ -8,6 +9,7 @@ class BotAnalytics:
 
     def __init__(self, api_key):
         self.api_key = api_key
+        self.session = requests.Session()
 
     @staticmethod
     def dict_from_message(message):
@@ -49,27 +51,36 @@ class BotAnalytics:
 
         return data
 
-    def track(self, message):
-        data = self.dict_from_message(message)
-
-        user_id = data['from']['id']
-        time_stamp = data['date']
-        event_name = data.get('bot_command', 'text')
-
+    def track(self, user_id, event_name, intent_name=None, time_stamp=None):
         data = {
             'api_key'    : self.api_key,
             'platform'   : 'Telegram',
             'message'    : event_name,
-            'intent'     : event_name,
+            'intent'     : intent_name or event_name,
             'version'    : '',
             'user_id'    : user_id,
             'not_handled': False,
-            'feedback'   : False,
-            'time_stamp' : time_stamp,
+            'time_stamp' : time_stamp or round(time.time()),
             'type'       : 'user',
         }
 
-        r = requests.post(self.api_url, data=json.dumps(data, ensure_ascii=False),
-                          headers={'Content-type': 'application/json', 'Accept': 'text/plain'})
-
+        r = self.session.post(self.api_url, data=json.dumps(data).encode(),
+                              headers={'Content-type': 'application/json', 'Accept': 'text/plain'})
         return r
+
+    def track_message(self, message):
+        data = self.dict_from_message(message)
+
+        user_id = data['from']['id']
+        event_name = data['bot_command'] if 'bot_command' in data else data.get('text', 'other')
+        intent_name = data.get('bot_command', 'text')
+        time_stamp = data['date']
+
+        return self.track(user_id, event_name, intent_name, time_stamp)
+
+    def track_callback(self, call):
+        user_id = call.from_user.id
+        event_name = call.data
+        intent_name = call.data.split('_')[0]
+
+        return self.track(user_id, event_name, intent_name)
