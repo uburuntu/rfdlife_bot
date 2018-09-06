@@ -5,7 +5,7 @@ from urllib.parse import unquote
 import requests
 import telebot
 from telebot import apihelper
-from telebot.apihelper import ApiException
+from telebot.apihelper import ApiException, _get_req_session
 
 
 def retry(exception, retries_count=5):
@@ -56,6 +56,7 @@ class TelebotWrapper(telebot.TeleBot):
     def set_proxy():
         apihelper.proxy = {'http' : TelebotWrapper.proxies_list[TelebotWrapper.next_proxy],
                            'https': TelebotWrapper.proxies_list[TelebotWrapper.next_proxy]}
+        _get_req_session(reset=True)
         TelebotWrapper.next_proxy = (TelebotWrapper.next_proxy + 1) % len(TelebotWrapper.proxies_list)
 
     @staticmethod
