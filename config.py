@@ -22,13 +22,21 @@ class FileLocation:
     user_data = join(gen_dir, 'user_data.json')
 
 
-chai_subscribers = [28006241,  # rmbk
-                    155094831,  # mix
-                    78179118,  # tester
-                    173546332,  # ryba
-                    122090167,  # isk
-                    100610568,  # nazar
-                    49705579,  # krab
-                    211145131]  # kobz
+chai_subscribers = [
+    28006241,  # rmbk
+    155094831,  # mix
+    78179118,  # tester
+    173546332,  # ryba
+    122090167,  # isk
+    100610568,  # nazar
+    49705579,  # krab
+    211145131  # kobz
+]
 
-admin_ids = [28006241]
+banned_ids = [
+    155094831,
+]
+
+admin_ids = [
+    28006241,
+]
