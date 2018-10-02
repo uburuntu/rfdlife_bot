@@ -1,5 +1,6 @@
 import functools
 from datetime import datetime
+from itertools import cycle
 from urllib.parse import unquote
 
 import requests
@@ -43,21 +44,21 @@ class TelebotWrapper(telebot.TeleBot):
         'socks5://user_2JpM:uwJeUn7jHMUdtinF@s2.shadowsocks.wtf:6685',
         'socks5://antimalware:eL2S5JbU@148.251.151.141:1080',
     ]
-    next_proxy = 0
+    curr_proxy = cycle(proxies_list)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.name = ''
+
+        apihelper.CONNECT_TIMEOUT = 2.5
 
     def init_name(self):
         self.name = '@' + self.get_me().username
 
     @staticmethod
     def set_proxy():
-        apihelper.proxy = {'http' : TelebotWrapper.proxies_list[TelebotWrapper.next_proxy],
-                           'https': TelebotWrapper.proxies_list[TelebotWrapper.next_proxy]}
+        apihelper.proxy = {'https': next(TelebotWrapper.curr_proxy)}
         _get_req_session(reset=True)
-        TelebotWrapper.next_proxy = (TelebotWrapper.next_proxy + 1) % len(TelebotWrapper.proxies_list)
 
     @staticmethod
     def log_exception(exc):
