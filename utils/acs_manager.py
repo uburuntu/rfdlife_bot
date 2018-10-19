@@ -32,7 +32,10 @@ class AcsManager:
     @staticmethod
     def remain_time(start_date, end_date, week_work_hours, time_in):
         # Some strange code for calc remain time
-        work_days = numpy.busday_count(start_date, end_date) if start_date != end_date else int(
+        # "Safe" casting from M8[us] to M8[D] to prevent numpy(>=1.15) error
+        start_date_m8d = AcsManager.time_format(start_date)
+        end_date_m8d = AcsManager.time_format(end_date)
+        work_days = numpy.busday_count(start_date_m8d, end_date_m8d) if start_date != end_date else int(
                 start_date.weekday() < 5)
         work_time_need = week_work_hours / 5 * work_days
         time_split = [int(x) for x in time_in.split(':')]
