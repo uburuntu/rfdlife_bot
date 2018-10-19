@@ -6,75 +6,69 @@ import requests
 
 class BotAnalytics:
     api_url = 'https://chatbase.com/api/message'
+    request_header = {'Content-type': 'application/json', 'Accept': 'text/plain'}
 
     def __init__(self, api_key):
+        """
+        Chatbase bot analytics, docs: chatbase.com/documentation/generic
+
+        Example usage:
+            analytics = BotAnalytics(api_key=chatbase_token)
+            ...
+            ret = analytics.track_message(message)
+            if not ret.ok:
+                print(ret.text)
+
+        :param api_key: Key from chatbase.com
+        """
         self.api_key = api_key
         self.session = requests.Session()
 
-    @staticmethod
-    def dict_from_message(message):
-        # Можно модифицировать для сбора конкретной информации
-        data = dict()
-
-        data['date'] = message.date
-        data['message_id'] = message.message_id
-        data['content_type'] = message.content_type
-
-        user = message.from_user
-        data['from'] = dict()
-        data['from']['id'] = user.id
-        data['from']['first_name'] = user.first_name
-        if isinstance(user.last_name, str):
-            data['from']['last_name'] = user.last_name
-        if isinstance(user.username, str):
-            data['from']['username'] = user.username
-        if isinstance(user.language_code, str):
-            data['from']['language_code'] = user.language_code
-
-        chat = message.chat
-        data['chat'] = dict()
-        data['chat']['id'] = chat.id
-        data['chat']['type'] = chat.type
-        if isinstance(chat.title, str):
-            data['chat']['title'] = chat.title
-        if isinstance(chat.username, str):
-            data['chat']['username'] = chat.username
-
-        text = message.text
-        if isinstance(text, str):
-            data['text'] = text
-            if message.entities is not None:
-                for entity in message.entities:
-                    if entity.type == 'bot_command':
-                        data['bot_command'] = text[entity.offset:entity.length].split('@')[0]
-                        break
-
-        return data
-
     def track(self, user_id, event_name, intent_name=None, time_stamp=None):
+        """
+        Track some event
+
+        :param user_id: unique id for current user
+        :param event_name: detailed event name or raw message
+        :param intent_name: event's group
+        :param time_stamp: UNIX-time of event
+        :return: requests.Response
+        """
         data = {
             'api_key'    : self.api_key,
             'platform'   : 'Telegram',
             'message'    : event_name,
             'intent'     : intent_name or event_name,
-            'version'    : '',
+            'version'    : 'stable',
             'user_id'    : user_id,
             'not_handled': False,
-            'time_stamp' : time_stamp or round(time.time()),
+            'time_stamp' : int(time_stamp or round(time.time())) * 1e3,
             'type'       : 'user',
         }
 
-        r = self.session.post(self.api_url, data=json.dumps(data).encode(),
-                              headers={'Content-type': 'application/json', 'Accept': 'text/plain'})
+        r = self.session.post(self.api_url, data=json.dumps(data).encode(), headers=self.request_header)
         return r
 
-    def track_message(self, message):
-        data = self.dict_from_message(message)
+    @staticmethod
+    def message_event_intent(message):
+        """
+        This function specialized for pyTelegramBotAPI, change it for other API implementation
+        """
+        text = message.text
+        if isinstance(text, str):
+            if message.entities is not None:
+                for entity in message.entities:
+                    if entity.type == 'bot_command':
+                        command = text[entity.offset:entity.length].split('@')[0]
+                        return command, command
+                else:
+                    return text, 'text'
+        return message.content_type, 'other'
 
-        user_id = data['from']['id']
-        event_name = data['bot_command'] if 'bot_command' in data else data.get('text', 'other')
-        intent_name = data.get('bot_command', 'text')
-        time_stamp = data['date']
+    def track_message(self, message):
+        user_id = message.from_user.id
+        event_name, intent_name = self.message_event_intent(message)
+        time_stamp = message.date
 
         return self.track(user_id, event_name, intent_name, time_stamp)
 
