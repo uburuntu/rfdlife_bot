@@ -379,7 +379,7 @@ if __name__ == '__main__':
     action_log('Running bot!')
 
     scheduler = BackgroundScheduler()
-    scheduler.add_job(my_acs.in_office_alert, 'interval', id='in_office_alert', replace_existing=True, seconds=120)
+    scheduler.add_job(my_acs.in_office_alert, 'interval', id='in_office_alert', max_instances=3, seconds=30)
     scheduler.add_job(birthday.birthday_check, 'cron', id='birthday_check', replace_existing=True, hour=11)
     scheduler.add_job(my_data.dump_file, 'cron', id='dump_file', replace_existing=True, hour=6)
     scheduler.start()
