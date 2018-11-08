@@ -8,6 +8,11 @@ from utils.common_utils import code, curr_time, my_bot
 
 
 class CameraView:
+    MIN_CAM_NUM      = 1
+    MAX_CAM_NUM      = 10
+    PLAYROOM_CAM_NUM = 1
+    KITCHEN_CAM_NUM  = 6
+
     def __init__(self, camera_num):
         self.camera_num = camera_num
 
@@ -40,14 +45,18 @@ class CameraView:
             return self.get_file_name()
         return config.FileLocation.camera_error
 
+def border(camera_num):
+        ret = (
+            CameraView.MAX_CAM_NUM
+            if camera_num < CameraView.MIN_CAM_NUM
+            else CameraView.MIN_CAM_NUM if camera_num > CameraView.MAX_CAM_NUM else camera_num)
+        return ret
+
 
 def camera_keyboard(camera_num):
-    def border(num):
-        return 12 if num < 4 else 4 if num > 12 else num
-
     keyboard = InlineKeyboardMarkup()
     keyboard.add(Button(text='⬅️', callback_data='camera_{}'.format(border(camera_num - 1))),
-                 Button(text='🔄', callback_data='camera_{}'.format(camera_num)),
+                 Button(text='🔄', callback_data='camera_{}'.format(border(camera_num))),
                  Button(text='➡️', callback_data='camera_{}'.format(border(camera_num + 1))))
     return keyboard
 
@@ -60,11 +69,11 @@ def camera_show(message, camera_num):
 
 
 def playroom_show(message):
-    camera_show(message, 10)
+    camera_show(message, CameraView.PLAYROOM_CAM_NUM)
 
 
 def kitchen_show(message):
-    camera_show(message, 8)
+    camera_show(message, CameraView.KITCHEN_CAM_NUM)
 
 
 def camera_n_show(message):
@@ -72,7 +81,8 @@ def camera_n_show(message):
     if len(split) == 2 and split[1].isdigit():
         camera_show(message, int(split[1]))
     else:
-        my_bot.reply_to(message, ('Использование: {}, N=4..12').format(code('/camera [N]')))
+        ans = ('Использование: {}, N={}..{}').format(code('/camera [N]'), CameraView.MIN_CAM_NUM, CameraView.MAX_CAM_NUM )
+        my_bot.reply_to(message, ans)
 
 
 def update_camera(call):
