@@ -78,7 +78,7 @@ def kitchen_show(message):
 
 def camera_n_show(message):
     split = message.text.split()
-    if len(split) == 2 and split[1].isdigit():
+    if len(split) == 2 and split[1].isdigit() and border(int(split[1])) == int(split[1]):
         camera_show(message, int(split[1]))
     else:
         ans = ('Использование: {}, N={}..{}').format(code('/camera [N]'), CameraView.MIN_CAM_NUM, CameraView.MAX_CAM_NUM )
