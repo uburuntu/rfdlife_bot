@@ -34,15 +34,12 @@ def retry(exception, retries_count=5):
 class TelebotWrapper(telebot.TeleBot):
     # Free Telegram proxies from t.me/proxyme and others
     proxies_list = [
+        '',
         'socks5://telegram:telegram@sr123.spry.fail:1080',
-        'socks5://telegram:telegram@k45i6.nimble.zone:1080',
-        'socks5://telegram:telegram@239h4ym.spry.wtf:1080',
         'socks5://28006241:F1zcUqql@phobos.public.opennetwork.cc:1090',
         'socks5://28006241:F1zcUqql@deimos.public.opennetwork.cc:1090',
         'socks5://telegram:telegram@sreju5h4.spry.fail:1080',
         'socks5://telegram:telegram@rmpufgh1.teletype.live:1080',
-        'socks5://user_2JpM:uwJeUn7jHMUdtinF@s2.shadowsocks.wtf:6685',
-        'socks5://antimalware:eL2S5JbU@148.251.151.141:1080',
     ]
     curr_proxy = cycle(proxies_list)
 
