@@ -34,8 +34,9 @@ chai_subscribers = [
 ]
 
 banned_ids = [
-    155094831,
-    28006241,
+    155094831,  # mix
+    28006241,  # rmbk
+    211145131,  # kobz
 ]
 
 admin_ids = [
