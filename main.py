@@ -302,6 +302,15 @@ def command_notify_all_test(message):
         subs_notify([message.from_user.id], '{}\n\n{}'.format(bold('Оповещение пользователей бота'), split[1]))
 
 
+@my_bot.message_handler(func=commands_handler(['/echo']))
+@command_with_delay(delay=1)
+def command_echo(message):
+    user_action_log(message, 'called ' + message.text)
+    split = message.text.split(' ', 1)
+    if len(split) > 1:
+        subs_notify([message.from_user.id], split[1])
+
+
 @my_bot.message_handler(func=commands_handler(['/touch_all']))
 @bot_admin_command
 @command_with_delay(delay=1)
