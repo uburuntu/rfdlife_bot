@@ -37,6 +37,7 @@ banned_ids = [
     155094831,  # mix
     28006241,  # rmbk
     211145131,  # kobz
+    49705579,  # krab
 ]
 
 admin_ids = [
