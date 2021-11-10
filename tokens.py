@@ -2,7 +2,7 @@ import os
 
 # Set your api tokens and keys through environmental variables
 # (add lines to your .bashrc and restart terminal):
-export RFDLIFE_BOT_TOKEN='2085221709:AAFEhsjTQdUjN6MIOYYc3UadLhRBg0JTOgA'
+# export RFDLIFE_BOT_TOKEN='2085221709:AAFEhsjTQdUjN6MIOYYc3UadLhRBg0JTOgA'
 # export RFDLIFE_BOT_AUTH_LOGIN='first_name.second_name'
 # export RFDLIFE_BOT_AUTH_PSWD='corp_password'
 # export RFDLIFE_BOT_ACCESS_PSWD='registration_password'
