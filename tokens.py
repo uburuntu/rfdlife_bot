@@ -19,7 +19,7 @@ default_bot = ''
 bot = os.getenv('5642719790:AAFoQK-GnzbBTvzKy3s7uYgN7lvN-zvdKeA', default_bot)
 
 default_auth_login = ''
-auth_login = os.getenv('@rfd_nn_bot', default_auth_login)
+auth_login = os.getenv('rfd_nn_bot', default_auth_login)
 
 default_auth_pswd = ''
 auth_pswd = os.getenv('eJVW91qP', default_auth_pswd)
