@@ -8,3 +8,4 @@ PySocks>=1.6.7
 pyTelegramBotAPI>=3.6.5
 requests>=2.10.0
 tabulate>=0.8.2
+setuptools>=65.5.1 # not directly required, pinned by Snyk to avoid a vulnerability
