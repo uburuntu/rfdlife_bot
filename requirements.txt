@@ -6,5 +6,5 @@ python-dateutil>=2.7.3
 opencv-python>=3.4.0
 PySocks>=1.6.7
 pyTelegramBotAPI>=3.6.5
-requests>=2.10.0
+requests>=2.32.0
 tabulate>=0.8.2
